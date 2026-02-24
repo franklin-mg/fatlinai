@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Fatlin AI - Comunidad Digital FATLA</title>
     <meta name="theme-color" content="#0ea5e9">
-    <!-- Línea del Manifiesto para PWA y evitar cuelgues de búsqueda -->
+    
+    <!-- Manifiesto PWA -->
     <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Fatlin%20AI%22,%22short_name%22:%22Fatlin%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22#0ea5e9%22,%22theme_color%22:%22#0ea5e9%22}">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
@@ -332,12 +334,30 @@
         </footer>
     </div>
 
+    <!-- Registro de Service Worker optimizado (al final del body) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                const swCode = `
+                    self.addEventListener('install', e => self.skipWaiting());
+                    self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+                    self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => {})));
+                `;
+                const blob = new Blob([swCode], { type: 'text/javascript' });
+                const swUrl = URL.createObjectURL(blob);
+                navigator.serviceWorker.register(swUrl)
+                    .then(reg => console.log('Fatlin SW registrado'))
+                    .catch(err => console.log('SW error:', err));
+            });
+        }
+    </script>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, query, limit, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
 
-        const firebaseConfig = JSON.parse(__firebase_config);
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'fatlin-v1-gold';
         const apiKey = "";
 
@@ -366,7 +386,6 @@
             unsubscribe: null
         };
 
-        // --- AUTH ---
         async function initAuth() {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -376,14 +395,16 @@
                 }
             } catch (e) {
                 console.error("Auth error", e);
-                document.getElementById('error-modal').style.display = 'flex';
+                const errorModal = document.getElementById('error-modal');
+                if (errorModal) errorModal.style.display = 'flex';
             }
         }
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 state.user = user;
-                document.getElementById('user-id-tag').textContent = `ID: ${user.uid.substring(0,10)}...`;
+                const idTag = document.getElementById('user-id-tag');
+                if (idTag) idTag.textContent = `ID: ${user.uid.substring(0,10)}...`;
                 setupSync(user.uid);
             }
         });
@@ -399,7 +420,6 @@
                     setDoc(ref, state.progress);
                 }
                 
-                // Ocultar splash
                 const splash = document.getElementById('splash-screen');
                 if (splash) {
                     splash.style.opacity = '0';
@@ -410,7 +430,6 @@
             });
         }
 
-        // --- GEMINI API WITH BACKOFF ---
         async function fetchGemini(prompt, retries = 5, delay = 1000) {
             try {
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
@@ -435,7 +454,6 @@
             }
         }
 
-        // --- GAME LOGIC ---
         window.startMission = async (level) => {
             if (state.progress.lives <= 0) {
                 triggerVibration([50, 50, 50]);
@@ -443,11 +461,12 @@
             }
             state.playingLevel = level;
             const announce = document.getElementById('level-announce');
-            document.getElementById('announce-level-text').textContent = `NIVEL ${level}`;
-            announce.classList.remove('hidden');
+            const announceText = document.getElementById('announce-level-text');
+            if (announceText) announceText.textContent = `NIVEL ${level}`;
+            if (announce) announce.classList.remove('hidden');
             
             setTimeout(async () => {
-                announce.classList.add('hidden');
+                if (announce) announce.classList.add('hidden');
                 showLoading(true);
                 try {
                     const quizData = await fetchGemini(`Genera 3 preguntas de nivel educativo ${level} sobre FATLA.`);
@@ -456,7 +475,8 @@
                     renderQuizStep();
                     showView('quiz');
                 } catch (e) {
-                    document.getElementById('error-modal').style.display = 'flex';
+                    const errorModal = document.getElementById('error-modal');
+                    if (errorModal) errorModal.style.display = 'flex';
                 } finally {
                     showLoading(false);
                 }
@@ -491,7 +511,6 @@
                 btn.classList.add('bg-green-50', 'border-green-500', 'text-green-700');
                 state.progress.score += 100;
                 showFeedback(true, q.justification);
-                speak(`Correcto. ${q.justification}`);
             } else {
                 btn.classList.add('bg-rose-50', 'border-rose-500', 'text-rose-700', 'shake-animation');
                 triggerVibration(100);
@@ -500,44 +519,6 @@
                 showFeedback(false, q.justification);
             }
             saveProgress();
-        }
-
-        async function speak(text) {
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: `Say cheerfully: ${text}` }] }],
-                        generationConfig: { 
-                            responseModalities: ["AUDIO"],
-                            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } } } 
-                        }
-                    })
-                });
-                const result = await response.json();
-                const pcmData = result.candidates[0].content.parts[0].inlineData.data;
-                playWav(pcmData);
-            } catch (e) { console.log("TTS error ignored"); }
-        }
-
-        function playWav(base64) {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            const binaryString = atob(base64);
-            const len = binaryString.length;
-            const bytes = new Int16Array(len / 2);
-            for (let i = 0; i < len; i += 2) {
-                bytes[i/2] = (binaryString.charCodeAt(i+1) << 8) | binaryString.charCodeAt(i);
-            }
-            const buffer = audioCtx.createBuffer(1, bytes.length, 24000);
-            const nowBuffering = buffer.getChannelData(0);
-            for (let i = 0; i < bytes.length; i++) {
-                nowBuffering[i] = bytes[i] / 32768;
-            }
-            const source = audioCtx.createBufferSource();
-            source.buffer = buffer;
-            source.connect(audioCtx.destination);
-            source.start();
         }
 
         function showFeedback(ok, text) {
@@ -577,15 +558,19 @@
             showView('map');
         }
 
-        // --- INTERFACE UTILS ---
         function updateUI() {
-            document.getElementById('lives-text').textContent = `❤️ ${state.progress.lives}`;
-            document.getElementById('score-text').textContent = state.progress.score;
-            document.getElementById('footer-stars-text').textContent = state.progress.stars;
+            const livesText = document.getElementById('lives-text');
+            const scoreText = document.getElementById('score-text');
+            const starsText = document.getElementById('footer-stars-text');
+            
+            if (livesText) livesText.textContent = `❤️ ${state.progress.lives}`;
+            if (scoreText) scoreText.textContent = state.progress.score;
+            if (starsText) starsText.textContent = state.progress.stars;
             
             const lvl = state.progress.level;
             const start = Math.floor((lvl - 1) / 10) * 10 + 1;
             const path = document.getElementById('levels-path');
+            if (!path) return;
             path.innerHTML = '';
             
             for (let i = start; i < start + 10; i++) {
@@ -601,16 +586,18 @@
 
         async function saveProgress() {
             if (!state.user) return;
-            const userRef = doc(db, 'artifacts', appId, 'users', state.user.uid, 'progress', 'main');
-            await setDoc(userRef, state.progress);
-            
-            const rankingRef = doc(db, 'artifacts', appId, 'public', 'data', 'ranking', state.user.uid);
-            await setDoc(rankingRef, {
-                name: state.user.uid.substring(0,8),
-                score: state.progress.score,
-                level: state.progress.level,
-                updatedAt: Date.now()
-            });
+            try {
+                const userRef = doc(db, 'artifacts', appId, 'users', state.user.uid, 'progress', 'main');
+                await setDoc(userRef, state.progress);
+                
+                const rankingRef = doc(db, 'artifacts', appId, 'public', 'data', 'ranking', state.user.uid);
+                await setDoc(rankingRef, {
+                    name: state.user.uid.substring(0,8),
+                    score: state.progress.score,
+                    level: state.progress.level,
+                    updatedAt: Date.now()
+                });
+            } catch (e) { console.error("Save error", e); }
         }
 
         function checkLives() {
@@ -628,6 +615,7 @@
         window.showRanking = async () => {
             const m = document.getElementById('ranking-modal');
             const list = document.getElementById('ranking-list');
+            if (!m || !list) return;
             list.innerHTML = '<p class="text-center py-4">Cargando ranking...</p>';
             m.style.display = 'flex';
             try {
@@ -649,6 +637,7 @@
         window.showHistory = () => {
             const m = document.getElementById('history-modal');
             const grid = document.getElementById('trophy-grid');
+            if (!m || !grid) return;
             grid.innerHTML = TROPHIES.map(t => {
                 const owned = state.progress.trophies.includes(t.level);
                 return `<div class="flex flex-col items-center p-3 rounded-2xl ${owned ? 'bg-amber-50' : 'bg-slate-50 opacity-30'}">
@@ -660,23 +649,35 @@
         }
 
         window.exitQuiz = () => { hideFeedback(); showView('map'); }
-        window.closeModal = (id) => { document.getElementById(id).style.display = 'none'; }
-        function showLoading(show) { document.getElementById('view-loading').classList.toggle('hidden', !show); }
-        function showView(v) {
-            document.getElementById('view-map').classList.toggle('hidden', v !== 'map');
-            document.getElementById('view-quiz').classList.toggle('hidden', v !== 'quiz');
+        window.closeModal = (id) => { 
+            const m = document.getElementById(id);
+            if (m) m.style.display = 'none'; 
         }
-        function hideFeedback() { document.getElementById('feedback-panel').classList.remove('show'); }
+        function showLoading(show) { 
+            const loader = document.getElementById('view-loading');
+            if (loader) loader.classList.toggle('hidden', !show); 
+        }
+        function showView(v) {
+            const map = document.getElementById('view-map');
+            const quiz = document.getElementById('view-quiz');
+            if (map) map.classList.toggle('hidden', v !== 'map');
+            if (quiz) quiz.classList.toggle('hidden', v !== 'quiz');
+        }
+        function hideFeedback() { 
+            const panel = document.getElementById('feedback-panel');
+            if (panel) panel.classList.remove('show'); 
+        }
         function triggerVibration(p) { if(navigator.vibrate) navigator.vibrate(p); }
         function showTrophyModal(t) {
             const m = document.getElementById('trophy-modal');
-            document.getElementById('trophy-icon').textContent = t.icon;
-            document.getElementById('trophy-title').textContent = `¡LOGRO: ${t.name.toUpperCase()}!`;
-            m.style.display = 'flex';
+            const icon = document.getElementById('trophy-icon');
+            const title = document.getElementById('trophy-title');
+            if (icon) icon.textContent = t.icon;
+            if (title) title.textContent = `¡LOGRO: ${t.name.toUpperCase()}!`;
+            if (m) m.style.display = 'flex';
         }
 
-        initAuth();
+        window.onload = initAuth;
     </script>
 </body>
 </html>
-
