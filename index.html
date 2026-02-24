@@ -5,66 +5,242 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Fatlin AI - Comunidad Digital FATLA</title>
     <meta name="theme-color" content="#0ea5e9">
-    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Fatlin%20AI%22,%22short_name%22:%22Fatlin%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22#0ea5e9%22,%22theme_color%22:%22#0ea5e9%22}">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
-        body { font-family: 'Fredoka', sans-serif; background-color: #f0f2f5; margin: 0; display: flex; justify-content: center; overflow: hidden; -webkit-tap-highlight-color: transparent; }
-        #app-container { width: 100%; max-width: 500px; background: white; height: 100vh; display: flex; flex-direction: column; position: relative; box-shadow: 0 0 40px rgba(0,0,0,0.1); }
-        #splash-screen { position: absolute; inset: 0; background: #0ea5e9; z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; transition: opacity 0.5s ease-out; }
-        .splash-logo { width: 120px; height: 120px; background: white; border-radius: 30px; display: flex; align-items: center; justify-content: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); margin-bottom: 20px; animation: pulse-logo 2s infinite ease-in-out; }
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500&display=swap');
+        
+        body { 
+            font-family: 'Fredoka', sans-serif; 
+            background-color: #f0f2f5; 
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            overflow: hidden; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        /* Quitar negritas globales */
+        * { font-weight: 400 !important; }
+        .font-black, .font-bold, .font-semibold { font-weight: 400 !important; }
+
+        #app-container { 
+            width: 100%; 
+            max-width: 500px; 
+            background: white; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            position: relative; 
+            box-shadow: 0 0 40px rgba(0,0,0,0.1); 
+        }
+
+        .fatlin-icon {
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+
+        #splash-screen { 
+            position: absolute; 
+            inset: 0; 
+            background: #0ea5e9; 
+            z-index: 200; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            color: white; 
+            transition: opacity 0.5s ease-out; 
+        }
+
+        .splash-logo { 
+            width: 120px; 
+            height: 120px; 
+            background: white; 
+            border-radius: 30px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2); 
+            margin-bottom: 20px; 
+            animation: pulse-logo 2s infinite ease-in-out; 
+        }
+
         @keyframes pulse-logo { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-        .path-container { display: flex; flex-direction: column; align-items: center; padding: 40px 0 140px 0; gap: 40px; background-image: radial-gradient(#e2e8f0 1px, transparent 1px); background-size: 20px 20px; }
+
+        .path-container { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 40px 0 140px 0; 
+            gap: 40px; 
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px); 
+            background-size: 20px 20px; 
+        }
+
         .level-node { position: relative; z-index: 2; }
         .level-node:nth-child(odd) { transform: translateX(-40px); }
         .level-node:nth-child(even) { transform: translateX(40px); }
         .level-node.is-current { transform: translateX(0) scale(1.1); z-index: 10; }
-        .level-btn { width: 70px; height: 70px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; border-bottom: 6px solid rgba(0,0,0,0.2); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; }
+
+        .level-btn { 
+            width: 70px; 
+            height: 70px; 
+            border-radius: 50%; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 24px; 
+            border-bottom: 6px solid rgba(0,0,0,0.2); 
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            cursor: pointer; 
+            position: relative;
+        }
+
         .level-btn.locked { background: #cbd5e1; color: #94a3b8; border-bottom-color: #94a3b8; cursor: not-allowed; }
         .level-btn.current { background: #0ea5e9; color: white; border-bottom-color: #0369a1; box-shadow: 0 10px 20px rgba(14, 165, 233, 0.3); }
         .level-btn.completed { background: #22c55e; color: white; border-bottom-color: #15803d; }
-        .feedback-overlay { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%) translateY(100%); width: 100%; max-width: 500px; padding: 2rem; border-radius: 2rem 2rem 0 0; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 60; }
+
+        #modals-container > div { 
+            display: none; 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.7); 
+            backdrop-filter: blur(4px); 
+            z-index: 150; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 20px; 
+        }
+
+        .feedback-overlay { 
+            position: fixed; 
+            bottom: 0; 
+            left: 50%; 
+            transform: translateX(-50%) translateY(100%); 
+            width: 100%; 
+            max-width: 500px; 
+            padding: 2rem; 
+            border-radius: 2rem 2rem 0 0; 
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            z-index: 60; 
+        }
         .feedback-overlay.show { transform: translateX(-50%) translateY(0); }
-        #modals-container > div { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 150; align-items: center; justify-content: center; padding: 20px; }
-        .mascot-pointer { position: absolute; top: -45px; left: 50%; transform: translateX(-50%); background: #f59e0b; color: white; padding: 4px 12px; border-radius: 12px; font-size: 10px; font-weight: 800; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.2); animation: bounce 2s infinite; }
+
+        .mascot-pointer { 
+            position: absolute; 
+            top: -55px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            background: white; 
+            color: #0ea5e9; 
+            padding: 6px 12px; 
+            border-radius: 16px; 
+            font-size: 10px; 
+            white-space: nowrap; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+            animation: bounce 2s infinite; 
+            border: 2px solid #0ea5e9;
+        }
+        
         @keyframes bounce { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-10px); } }
-        .star-pill { background: rgba(245, 158, 11, 0.1); color: #d97706; padding: 4px 10px; border-radius: 12px; border: 1px solid rgba(245, 158, 11, 0.2); font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 4px; }
+
+        .star-pill { 
+            background: rgba(245, 158, 11, 0.1); 
+            color: #d97706; 
+            padding: 4px 10px; 
+            border-radius: 12px; 
+            border: 1px solid rgba(245, 158, 11, 0.2); 
+            font-size: 11px; 
+            display: flex; 
+            align-items: center; 
+            gap: 4px; 
+        }
+
         .shake-animation { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
         @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+
+        main::-webkit-scrollbar { width: 0; }
+        
+        /* Barra de progreso de auto-avance */
+        .auto-progress {
+            height: 4px;
+            background: rgba(0,0,0,0.1);
+            width: 100%;
+            margin-top: 10px;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .auto-progress-fill {
+            height: 100%;
+            background: currentColor;
+            width: 100%;
+            transform-origin: left;
+        }
+        .animate-progress { animation: shrink linear forwards; }
+        @keyframes shrink { from { transform: scaleX(1); } to { transform: scaleX(0); } }
     </style>
 </head>
 <body>
+    <template id="fatlin-svg-template">
+        <svg class="fatlin-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+    </template>
+
     <div id="app-container">
-        <!-- Splash Screen -->
         <div id="splash-screen">
             <div class="splash-logo">
-                <svg class="w-20 h-20 text-sky-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                </svg>
+                <div class="w-20 h-20 text-sky-500" id="splash-icon-placeholder"></div>
             </div>
-            <h1 class="text-3xl font-black mb-1">Fatlin AI</h1>
-            <p class="text-sky-100 font-bold opacity-80 uppercase tracking-widest text-xs">Cargando Planeta FATLA...</p>
+            <h1 class="text-3xl mb-1">Fatlin AI</h1>
+            <p class="text-sky-100 opacity-80 uppercase tracking-widest text-xs">Conectando al Planeta FATLA...</p>
         </div>
 
-        <!-- Modales -->
         <div id="modals-container">
+            <div id="auth-modal">
+                <div class="bg-white p-8 rounded-[3rem] max-w-sm w-full border-4 border-slate-50 relative">
+                    <button onclick="closeModal('auth-modal')" class="absolute top-6 right-6 text-slate-300">✕</button>
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 text-sky-500 mx-auto mb-3" id="auth-icon-placeholder"></div>
+                        <h2 class="text-2xl text-slate-800">Perfil de Explorador</h2>
+                        <p id="auth-status-text" class="text-slate-500 text-sm">Estás jugando como Invitado.</p>
+                    </div>
+
+                    <div id="auth-form" class="space-y-4">
+                        <input type="email" id="auth-email" placeholder="Correo electrónico" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-sky-500 outline-none transition-all">
+                        <input type="password" id="auth-pass" placeholder="Contraseña" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-sky-500 outline-none transition-all">
+                        
+                        <div class="flex gap-2">
+                            <button onclick="handleAuth('login')" class="flex-1 py-4 bg-sky-500 text-white rounded-2xl shadow-lg active:scale-95 transition-all">ENTRAR</button>
+                            <button onclick="handleAuth('signup')" class="flex-1 py-4 bg-white border-2 border-sky-500 text-sky-500 rounded-2xl active:scale-95 transition-all text-xs text-center">REGISTRO</button>
+                        </div>
+                    </div>
+
+                    <div id="logged-info" class="hidden space-y-4">
+                        <div class="p-4 bg-sky-50 rounded-2xl border-2 border-sky-100">
+                            <p class="text-[10px] text-sky-500 uppercase">Sesión iniciada como:</p>
+                            <p id="user-display-email" class="text-slate-800 break-all"></p>
+                        </div>
+                        <button onclick="handleLogout()" class="w-full py-4 bg-rose-50 text-rose-500 rounded-2xl border-2 border-rose-100 active:scale-95">CERRAR SESIÓN</button>
+                    </div>
+                </div>
+            </div>
+
             <div id="trophy-modal">
                 <div class="bg-white p-8 rounded-[3rem] text-center max-w-sm w-full border-4 border-slate-50">
                     <div id="trophy-icon" class="text-8xl mb-4">🏆</div>
-                    <h2 class="text-2xl font-black text-slate-800" id="trophy-title">¡NUEVO TROFEO!</h2>
-                    <p class="text-slate-500 font-medium mt-2 mb-6" id="trophy-desc">Has desbloqueado un nuevo logro PACIE.</p>
-                    <button onclick="closeModal('trophy-modal')" class="w-full py-4 bg-sky-500 text-white font-black rounded-2xl shadow-lg active:scale-95">¡FANTÁSTICO!</button>
+                    <h2 class="text-2xl text-slate-800" id="trophy-title">¡NUEVO TROFEO!</h2>
+                    <p class="text-slate-500 mt-2 mb-6" id="trophy-desc">Has desbloqueado un nuevo logro PACIE.</p>
+                    <button onclick="closeModal('trophy-modal')" class="w-full py-4 bg-sky-500 text-white rounded-2xl shadow-lg active:scale-95">¡FANTÁSTICO!</button>
                 </div>
             </div>
 
             <div id="history-modal">
                 <div class="bg-white rounded-[3rem] w-full max-sm p-8 shadow-2xl border-4 border-slate-50">
                     <div class="flex justify-between items-center mb-6">
-                        <div>
-                            <h3 class="text-2xl font-black text-slate-800">Mis Trofeos</h3>
-                            <p class="text-[10px] font-bold text-sky-500">PROGRESO PACIE</p>
-                        </div>
-                        <button onclick="closeModal('history-modal')" class="text-slate-400 font-bold">✕</button>
+                        <h3 class="text-2xl text-slate-800">Mis Trofeos</h3>
+                        <button onclick="closeModal('history-modal')" class="text-slate-400">✕</button>
                     </div>
                     <div id="trophy-grid" class="grid grid-cols-3 gap-4 max-h-[40vh] overflow-y-auto"></div>
                 </div>
@@ -73,8 +249,8 @@
             <div id="ranking-modal">
                 <div class="bg-white rounded-[3rem] w-full max-sm p-8 shadow-2xl border-4 border-slate-50">
                     <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-2xl font-black text-slate-800">Top Exploradores</h3>
-                        <button onclick="closeModal('ranking-modal')" class="text-slate-400 font-bold">✕</button>
+                        <h3 class="text-2xl text-slate-800">Top Exploradores</h3>
+                        <button onclick="closeModal('ranking-modal')" class="text-slate-400">✕</button>
                     </div>
                     <div id="ranking-list" class="space-y-3 max-h-[50vh] overflow-y-auto"></div>
                 </div>
@@ -83,31 +259,28 @@
             <div id="error-modal">
                 <div class="bg-white p-8 rounded-[3rem] text-center max-w-sm w-full">
                     <div class="text-6xl mb-4">🛰️</div>
-                    <h2 class="text-xl font-black text-slate-800">Problema de Señal</h2>
-                    <p class="text-slate-500 text-sm mt-2 mb-6">No se pudo contactar con el Planeta FATLA. Verifica tu conexión.</p>
-                    <button onclick="location.reload()" class="w-full py-4 bg-slate-800 text-white font-black rounded-2xl">REINTENTAR</button>
+                    <h2 class="text-xl text-slate-800">Problema de Señal</h2>
+                    <p class="text-slate-500 text-sm mt-2 mb-6">No se pudo contactar con el servidor.</p>
+                    <button onclick="location.reload()" class="w-full py-4 bg-slate-800 text-white rounded-2xl">REINTENTAR</button>
                 </div>
             </div>
         </div>
 
         <header class="bg-white border-b-2 border-slate-100 px-4 py-4 flex flex-col gap-3 sticky top-0 z-50">
             <div class="flex justify-between items-center">
-                <div class="flex items-center gap-2">
-                    <div class="w-10 h-10 bg-sky-600 rounded-xl flex items-center justify-center text-white shadow-lg rotate-3">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="w-6 h-6"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                <button onclick="showAuth()" class="flex items-center gap-2 group">
+                    <div id="header-avatar" class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-sky-500 shadow-inner border-2 border-white ring-2 ring-slate-50 p-1.5"></div>
+                    <div class="text-left">
+                        <h1 class="text-xs text-slate-800 leading-none" id="header-username">Invitado</h1>
+                        <p class="text-[8px] text-sky-500 uppercase tracking-widest mt-1">Mi Perfil</p>
                     </div>
-                    <div>
-                        <h1 class="text-lg font-black text-slate-800 leading-none">Fatlin AI</h1>
-                        <p class="text-[9px] font-bold text-sky-500 uppercase tracking-widest mt-1">v1.0 Gold</p>
-                    </div>
-                </div>
-                
+                </button>
                 <div class="flex gap-2">
                     <button onclick="showHistory()" class="bg-sky-50 p-2.5 rounded-xl border-2 border-sky-100 shadow-sm active:scale-90">🏅</button>
                     <button onclick="showRanking()" class="bg-amber-50 p-2.5 rounded-xl border-2 border-amber-100 shadow-sm active:scale-90">🏆</button>
                     <div class="bg-rose-50 px-3 py-1.5 rounded-xl border-2 border-rose-100 flex flex-col items-center min-w-[60px]">
-                        <span id="lives-text" class="font-black text-rose-700 text-xs">❤️ 5</span>
-                        <span id="timer-text" class="text-[8px] font-bold text-rose-400 hidden">00:00</span>
+                        <span id="lives-text" class="text-rose-700 text-xs">❤️ 5</span>
+                        <span id="timer-text" class="text-[8px] text-rose-400 hidden">00:00</span>
                     </div>
                 </div>
             </div>
@@ -116,27 +289,25 @@
         <main id="game-content" class="flex-1 overflow-y-auto relative bg-slate-50">
             <div id="view-loading" class="absolute inset-0 flex flex-col items-center justify-center p-10 bg-white/80 backdrop-blur-sm z-40 hidden">
                 <div class="w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
-                <p class="text-slate-500 font-bold mt-4 animate-pulse">Consultando a Fatlin...</p>
+                <p class="text-slate-500 mt-4 animate-pulse">Consultando a Fatlin...</p>
             </div>
-            
             <div id="view-map">
                 <div class="bg-gradient-to-r from-sky-600 to-sky-500 p-6 text-white text-center shadow-lg">
-                    <h2 id="stage-title" class="text-[10px] font-black uppercase tracking-[0.3em] mb-1 opacity-70">FASE ACTUAL</h2>
-                    <p id="stage-desc" class="text-lg font-bold">Metodología PACIE en el Aula</p>
+                    <h2 id="stage-title" class="text-[10px] uppercase tracking-[0.3em] mb-1 opacity-70">FASE ACTUAL</h2>
+                    <p id="stage-desc" class="text-lg">Metodología PACIE en el Aula</p>
                 </div>
                 <div class="path-container" id="levels-path"></div>
             </div>
-
             <div id="view-quiz" class="hidden h-full p-6 flex flex-col bg-white">
                 <div class="max-w-md mx-auto w-full flex-1 flex flex-col">
                     <div class="mb-8 flex items-center gap-4">
-                        <button onclick="exitQuiz()" class="text-slate-300 hover:text-rose-500 font-black text-2xl">✕</button>
+                        <button onclick="exitQuiz()" class="text-slate-300 hover:text-rose-500 text-2xl">✕</button>
                         <div class="h-3 flex-1 bg-slate-100 rounded-full overflow-hidden">
                             <div id="quiz-progress" class="h-full bg-sky-500 transition-all duration-500" style="width: 0%"></div>
                         </div>
                     </div>
                     <div id="question-card" class="bg-sky-50 rounded-[2.5rem] p-8 mb-8 border-4 border-white shadow-xl shadow-sky-100">
-                        <h2 id="question-text" class="text-xl font-bold text-slate-800 text-center"></h2>
+                        <h2 id="question-text" class="text-xl text-slate-800 text-center"></h2>
                     </div>
                     <div id="options-container" class="space-y-3"></div>
                 </div>
@@ -145,16 +316,19 @@
 
         <div id="feedback-panel" class="feedback-overlay bg-white shadow-[0_-15px_40px_rgba(0,0,0,0.1)]">
             <div class="flex flex-col gap-4">
-                <div id="feedback-msg" class="text-2xl font-black text-center"></div>
-                <p id="feedback-justification" class="text-sm font-medium text-slate-500 text-center"></p>
-                <button id="btn-next" class="w-full py-5 text-white font-black text-xl rounded-[1.5rem] shadow-xl active:scale-95 transition-all">CONTINUAR</button>
+                <div id="feedback-msg" class="text-2xl text-center"></div>
+                <p id="feedback-justification" class="text-sm text-slate-500 text-center"></p>
+                <div id="auto-timer-bar" class="auto-progress">
+                    <div id="auto-timer-fill" class="auto-progress-fill"></div>
+                </div>
+                <button id="btn-next" class="w-full py-5 text-white text-xl rounded-[1.5rem] shadow-xl active:scale-95 transition-all">CONTINUAR</button>
             </div>
         </div>
 
         <footer class="bg-slate-900 px-6 py-4 flex justify-between items-center">
             <div class="flex flex-col">
-                <span id="user-id-tag" class="text-[9px] font-bold text-slate-400 uppercase">ID: ---</span>
-                <span class="text-[8px] font-medium text-slate-500">TECNOTIPS © 2026</span>
+                <span id="user-id-tag" class="text-[9px] text-slate-400 uppercase">Invitado</span>
+                <span class="text-[8px] text-slate-500">TECNOTIPS © 2026</span>
             </div>
             <div class="flex gap-4">
                 <div class="star-pill">⭐ <span id="footer-stars-text">0</span></div>
@@ -164,19 +338,19 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, query, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, query, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const firebaseConfig = JSON.parse(__firebase_config);
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'fatlin-v1-gold';
-        const apiKey = ""; // API Key de Gemini (inyectada por el entorno)
+        const apiKey = ""; 
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        const REGEN_TIME = 5 * 60 * 1000; // 5 minutos por vida
+        const REGEN_TIME = 5 * 60 * 1000; 
         const SYSTEM_PROMPT = `Actúa como Fatlin, tutor del Planeta FATLA. Genera desafíos educativos breves sobre metodología PACIE y educación virtual.
         Debes responder EXCLUSIVAMENTE en formato JSON: {"questions":[{"q":"pregunta","options":["A","B","C"],"correct":0,"justification":"explicación"}]}`;
 
@@ -189,34 +363,97 @@
 
         let state = {
             user: null,
+            isAnonymous: true,
             progress: { level: 1, lives: 5, score: 0, stars: 0, lastLifeLoss: Date.now(), trophies: [] },
             currentQuiz: [],
             quizIndex: 0,
             playingLevel: 0,
-            isAnswering: false
+            isAnswering: false,
+            autoTimer: null
         };
 
-        async function init() {
+        function injectFatlinIcon(targetId) {
+            const target = document.getElementById(targetId);
+            if (!target) return;
+            const template = document.getElementById('fatlin-svg-template');
+            const clone = template.content.cloneNode(true);
+            target.innerHTML = '';
+            target.appendChild(clone);
+        }
+
+        injectFatlinIcon('splash-icon-placeholder');
+        injectFatlinIcon('header-avatar');
+        injectFatlinIcon('auth-icon-placeholder');
+
+        window.closeModal = (id) => document.getElementById(id).style.display = 'none';
+        window.showAuth = () => {
+            document.getElementById('auth-modal').style.display = 'flex';
+            updateAuthModalUI();
+        };
+
+        function updateAuthModalUI() {
+            const isAnon = state.isAnonymous;
+            document.getElementById('auth-status-text').textContent = isAnon ? "Estás jugando como Invitado." : "Tu progreso está seguro.";
+            document.getElementById('auth-form').classList.toggle('hidden', !isAnon);
+            document.getElementById('logged-info').classList.toggle('hidden', isAnon);
+            if (!isAnon && state.user) {
+                document.getElementById('user-display-email').textContent = state.user.email || 'Usuario Registrado';
+            }
+        }
+
+        window.handleAuth = async (type) => {
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-pass').value;
+            if (!email || !pass) return;
+
+            try {
+                showLoading(true);
+                if (type === 'login') {
+                    await signInWithEmailAndPassword(auth, email, pass);
+                } else {
+                    await createUserWithEmailAndPassword(auth, email, pass);
+                }
+                closeModal('auth-modal');
+            } catch (e) {
+                console.error(e);
+            } finally {
+                showLoading(false);
+            }
+        };
+
+        window.handleLogout = async () => {
+            await signOut(auth);
+            location.reload();
+        };
+
+        const initApp = async () => {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
                     await signInAnonymously(auth);
                 }
-            } catch (e) {
-                document.getElementById('error-modal').style.display = 'flex';
+            } catch (err) {
+                console.error("Auth initialization failed:", err);
             }
-        }
+        };
+        initApp();
 
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 state.user = user;
-                document.getElementById('user-id-tag').textContent = `ID: ${user.uid.substring(0,10)}...`;
+                state.isAnonymous = user.isAnonymous;
+                const username = (user.email && user.email.includes('@')) 
+                    ? user.email.split('@')[0] 
+                    : "Invitado";
+                document.getElementById('header-username').textContent = username;
+                document.getElementById('user-id-tag').textContent = user.isAnonymous ? "Modo Invitado" : "Explorador";
                 setupSync(user.uid);
             }
         });
 
         function setupSync(uid) {
+            if (!state.user) return;
             const ref = doc(db, 'artifacts', appId, 'users', uid, 'progress', 'main');
             onSnapshot(ref, (snap) => {
                 if (snap.exists()) {
@@ -229,8 +466,17 @@
                 document.getElementById('splash-screen').style.opacity = '0';
                 setTimeout(() => document.getElementById('splash-screen').style.display = 'none', 500);
             }, (err) => {
-                console.error("Sync error:", err);
+                console.error("Firestore sync error:", err);
             });
+        }
+
+        async function saveProgress() {
+            if (!state.user) return;
+            const ref = doc(db, 'artifacts', appId, 'users', state.user.uid, 'progress', 'main');
+            await setDoc(ref, state.progress);
+            const displayName = (state.user.email && state.user.email.includes('@')) ? state.user.email.split('@')[0] : "Invitado";
+            const rankRef = doc(db, 'artifacts', appId, 'public', 'data', 'ranking', state.user.uid);
+            await setDoc(rankRef, { name: displayName, score: state.progress.score, level: state.progress.level, uid: state.user.uid });
         }
 
         async function fetchQuestions(level) {
@@ -247,16 +493,11 @@
                 });
                 const data = await res.json();
                 return JSON.parse(data.candidates[0].content.parts[0].text).questions;
-            } catch (e) {
-                throw new Error("API Gemini Error");
-            }
+            } catch (e) { throw new Error("Gemini Error"); }
         }
 
         window.startMission = async (level) => {
-            if (state.progress.lives <= 0) {
-                if(navigator.vibrate) navigator.vibrate([50, 50]);
-                return;
-            }
+            if (state.progress.lives <= 0) return;
             state.playingLevel = level;
             showLoading(true);
             try {
@@ -266,9 +507,7 @@
                 showView('quiz');
             } catch (e) {
                 document.getElementById('error-modal').style.display = 'flex';
-            } finally {
-                showLoading(false);
-            }
+            } finally { showLoading(false); }
         };
 
         function renderQuiz() {
@@ -276,12 +515,11 @@
             state.isAnswering = true;
             document.getElementById('question-text').textContent = q.q;
             document.getElementById('quiz-progress').style.width = `${((state.quizIndex + 1) / state.currentQuiz.length) * 100}%`;
-            
             const container = document.getElementById('options-container');
             container.innerHTML = '';
             q.options.forEach((opt, i) => {
                 const btn = document.createElement('button');
-                btn.className = "w-full p-5 rounded-2xl text-left font-bold text-slate-700 bg-white border-2 border-slate-100 shadow-sm transition-all active:scale-95";
+                btn.className = "w-full p-5 rounded-2xl text-left text-slate-700 bg-white border-2 border-slate-100 shadow-sm transition-all active:scale-95";
                 btn.textContent = opt;
                 btn.onclick = () => checkAnswer(i, btn);
                 container.appendChild(btn);
@@ -293,7 +531,6 @@
             state.isAnswering = false;
             const q = state.currentQuiz[state.quizIndex];
             const correct = idx === q.correct;
-
             if (correct) {
                 btn.classList.add('bg-green-50', 'border-green-500', 'text-green-700');
                 state.progress.score += 50;
@@ -309,12 +546,29 @@
         function showFeedback(ok, text) {
             const panel = document.getElementById('feedback-panel');
             const msg = document.getElementById('feedback-msg');
+            const timerFill = document.getElementById('auto-timer-fill');
+            const btnNext = document.getElementById('btn-next');
+            
+            clearTimeout(state.autoTimer);
+            
             msg.textContent = ok ? "¡EXCELENTE!" : "¡APRENDIZAJE!";
-            msg.className = `text-2xl font-black text-center ${ok ? 'text-green-600' : 'text-rose-600'}`;
+            msg.className = `text-2xl text-center ${ok ? 'text-green-600' : 'text-rose-600'}`;
             document.getElementById('feedback-justification').textContent = text;
+            btnNext.className = `w-full py-5 text-white text-xl rounded-[1.5rem] shadow-xl active:scale-95 transition-all ${ok ? 'bg-green-500' : 'bg-rose-500'}`;
+            
             panel.classList.add('show');
 
-            document.getElementById('btn-next').onclick = () => {
+            const delay = ok ? 3000 : 4000;
+            
+            // Animación de barra de tiempo
+            timerFill.style.color = ok ? '#22c55e' : '#f43f5e';
+            timerFill.classList.remove('animate-progress');
+            void timerFill.offsetWidth; // Trigger reflow
+            timerFill.style.animationDuration = `${delay}ms`;
+            timerFill.classList.add('animate-progress');
+
+            const proceed = () => {
+                clearTimeout(state.autoTimer);
                 panel.classList.remove('show');
                 if (state.progress.lives <= 0) {
                     showView('map');
@@ -327,6 +581,9 @@
                     completeLevel();
                 }
             };
+
+            btnNext.onclick = proceed;
+            state.autoTimer = setTimeout(proceed, delay);
         }
 
         function completeLevel() {
@@ -346,14 +603,13 @@
         function updateLives() {
             if (state.progress.lives < 5) {
                 const now = Date.now();
-                const diff = now - state.progress.lastLifeLoss;
+                const diff = now - (state.progress.lastLifeLoss || now);
                 const recovered = Math.floor(diff / REGEN_TIME);
                 if (recovered > 0) {
                     state.progress.lives = Math.min(5, state.progress.lives + recovered);
                     state.progress.lastLifeLoss = now - (diff % REGEN_TIME);
                     saveProgress();
                 }
-                // Mostrar timer
                 const timerEl = document.getElementById('timer-text');
                 timerEl.classList.remove('hidden');
                 const nextLife = REGEN_TIME - (diff % REGEN_TIME);
@@ -369,55 +625,49 @@
             document.getElementById('lives-text').textContent = `❤️ ${state.progress.lives}`;
             document.getElementById('score-text').textContent = state.progress.score;
             document.getElementById('footer-stars-text').textContent = state.progress.stars;
-
             const path = document.getElementById('levels-path');
             path.innerHTML = '';
             const startLvl = Math.floor((state.progress.level - 1) / 10) * 10 + 1;
-            
+            const template = document.getElementById('fatlin-svg-template');
             for (let i = startLvl; i < startLvl + 10; i++) {
                 const isLocked = i > state.progress.level;
                 const isCompleted = i < state.progress.level;
+                const isCurrent = i === state.progress.level;
                 const node = document.createElement('div');
-                node.className = `level-node ${i === state.progress.level ? 'is-current' : ''}`;
-                node.innerHTML = `
-                    <button class="level-btn ${isCompleted ? 'completed' : (isLocked ? 'locked' : 'current')}" ${isLocked ? 'disabled' : ''}>
-                        ${i === state.progress.level ? '🚀' : i}
-                    </button>
-                    ${i === state.progress.level ? '<div class="mascot-pointer">ESTÁS AQUÍ</div>' : ''}
-                `;
-                node.querySelector('button').onclick = () => window.startMission(i);
+                node.className = `level-node ${isCurrent ? 'is-current' : ''}`;
+                const btn = document.createElement('button');
+                btn.className = `level-btn ${isCompleted ? 'completed' : (isLocked ? 'locked' : 'current')}`;
+                if (isLocked) btn.disabled = true;
+                if (isCurrent) {
+                    const clone = template.content.cloneNode(true);
+                    const svg = clone.querySelector('svg');
+                    svg.classList.add('w-10', 'h-10');
+                    btn.appendChild(clone);
+                    const pointer = document.createElement('div');
+                    pointer.className = "mascot-pointer";
+                    pointer.textContent = "ESTÁS AQUÍ";
+                    node.appendChild(pointer);
+                } else { btn.textContent = i; }
+                btn.onclick = () => window.startMission(i);
+                node.appendChild(btn);
                 path.appendChild(node);
             }
         }
 
-        async function saveProgress() {
-            if (!state.user) return;
-            const ref = doc(db, 'artifacts', appId, 'users', state.user.uid, 'progress', 'main');
-            await setDoc(ref, state.progress);
-            
-            // Guardar en Ranking Público
-            const rankRef = doc(db, 'artifacts', appId, 'public', 'data', 'ranking', state.user.uid);
-            await setDoc(rankRef, {
-                name: state.user.uid.substring(0, 8),
-                score: state.progress.score,
-                level: state.progress.level
-            });
-        }
-
         window.showRanking = async () => {
             const list = document.getElementById('ranking-list');
-            list.innerHTML = '<div class="text-center py-4 animate-pulse">Cargando Planeta...</div>';
+            list.innerHTML = '<div class="text-center py-4">Buscando exploradores...</div>';
             document.getElementById('ranking-modal').style.display = 'flex';
-            const q = query(collection(db, 'artifacts', appId, 'public', 'data', 'ranking'));
+            const q = collection(db, 'artifacts', appId, 'public', 'data', 'ranking');
             const snap = await getDocs(q);
             let players = [];
             snap.forEach(d => players.push(d.data()));
             players.sort((a,b) => b.score - a.score);
             list.innerHTML = players.map((p, i) => `
                 <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
-                    <span class="font-black text-slate-400">#${i+1}</span>
-                    <span class="flex-1 px-4 font-bold text-slate-700">Explorador ${p.name}</span>
-                    <span class="font-black text-sky-600">${p.score}</span>
+                    <span class="text-slate-400">#${i+1}</span>
+                    <span class="flex-1 px-4 text-slate-700">${p.name}</span>
+                    <span class="text-sky-600 font-medium">${p.score}</span>
                 </div>
             `).join('');
         };
@@ -425,11 +675,11 @@
         window.showHistory = () => {
             const grid = document.getElementById('trophy-grid');
             grid.innerHTML = TROPHIES.map(t => {
-                const owned = state.progress.trophies.includes(t.level);
+                const owned = state.progress.trophies && state.progress.trophies.includes(t.level);
                 return `
                     <div class="flex flex-col items-center p-3 rounded-2xl ${owned ? 'bg-amber-50' : 'bg-slate-100 opacity-30'}">
                         <span class="text-3xl mb-1">${t.icon}</span>
-                        <span class="text-[8px] font-black text-center">${t.name}</span>
+                        <span class="text-[8px] text-center">${t.name}</span>
                     </div>
                 `;
             }).join('');
@@ -447,11 +697,8 @@
             document.getElementById('view-map').classList.toggle('hidden', v !== 'map');
             document.getElementById('view-quiz').classList.toggle('hidden', v !== 'quiz');
         }
-        window.closeModal = (id) => document.getElementById(id).style.display = 'none';
         window.exitQuiz = () => showView('map');
-
         setInterval(updateLives, 1000);
-        init();
     </script>
 </body>
 </html>
