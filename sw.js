@@ -3,6 +3,7 @@ const ASSETS = [
   './',
   './index.html',
   './manifest.json',
+  './ico-192.png',
   './ico-512.png'
 ];
 
@@ -29,4 +30,5 @@ self.addEventListener('fetch', event => {
       return response || fetch(event.request);
     })
   );
+
 });
