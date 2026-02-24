@@ -1,0 +1,17 @@
+{
+  "name": "Fatlin AI - Planeta FATLA",
+  "short_name": "Fatlin AI",
+  "description": "Tutor inteligente para la metodología PACIE en la comunidad FATLA.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0ea5e9",
+  "theme_color": "#0ea5e9",
+  "icons": [
+    {
+      "src": "ico-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
