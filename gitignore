@@ -1,0 +1,53 @@
+# ═══════════════════════════════════════════════════════
+#  Fatlin AI — .gitignore
+# ═══════════════════════════════════════════════════════
+
+# Firebase CLI
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+firestore-debug.log
+ui-debug.log
+hosting.*.cache
+
+# Node (si se usa Firebase CLI localmente)
+node_modules/
+package-lock.json
+npm-debug.log*
+
+# Variables de entorno y secretos — NUNCA subir al repo
+.env
+.env.local
+.env.*.local
+*.env
+secrets.json
+serviceAccountKey.json
+*-serviceAccount.json
+
+# Editores y sistemas operativos
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/settings.json
+*.suo
+*.user
+
+# Build/distribución (si se agrega en el futuro)
+dist/
+build/
+.cache/
+
+# Logs
+logs/
+*.log
+
+# Archivos temporales
+*.tmp
+*.temp

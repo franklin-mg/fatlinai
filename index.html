@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <!-- ═══════════════════════════════════════════
+         PWA — METAETIQUETAS ESENCIALES
+    ═══════════════════════════════════════════ -->
+    <title>Fatlin AI - Adventure</title>
+    <meta name="description" content="Aprende la metodología PACIE jugando. Preguntas generadas con IA desde fuentes oficiales de FATLA.">
+    <meta name="keywords" content="PACIE, FATLA, educación virtual, e-learning, quiz, juego educativo">
+    <meta name="author" content="Fatlin Tecnopedagogico">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Tema de color (barra de navegación Android / iOS) -->
+    <meta name="theme-color" content="#0ea5e9">
+    <meta name="msapplication-navbutton-color" content="#0ea5e9">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <!-- iOS — comportamiento como app instalada -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Fatlin AI">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <!-- iOS — iconos para pantalla de inicio -->
+    <link rel="apple-touch-icon" href="icons/icon-152.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
+
+    <!-- Favicon estándar -->
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-48.png">
+    <link rel="shortcut icon" href="icons/icon-96.png">
+
+    <!-- iOS Splash screens (opcionales pero mejoran la experiencia) -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+    <!-- No indexar por buscadores (app privada de estudio) -->
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- Prevenir detección automática de teléfonos/emails en iOS -->
+    <meta name="format-detection" content="telephone=no, email=no">
+
+    <!-- Open Graph (para compartir en WhatsApp/redes con preview) -->
+    <meta property="og:title" content="Fatlin AI - Metodología PACIE">
+    <meta property="og:description" content="Juego educativo con IA. Aprende PACIE nivel por nivel.">
+    <meta property="og:image" content="icons/icon-512.png">
+    <meta property="og:type" content="website">
+
+    <!-- ═══════════════════════════════════════════
+         FUENTE
+    ═══════════════════════════════════════════ -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <!-- ═══════════════════════════════════════════
+         ESTILOS (idénticos a la versión anterior)
+    ═══════════════════════════════════════════ -->
+    <!-- ═══════════════════════════════════════════
+         ESTILOS — archivo externo (cacheable)
+    ═══════════════════════════════════════════ -->
+    <link rel="stylesheet" href="css/styles.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════
+     SVG SPRITE — Símbolos reutilizables con <use href="#id">
+     Invisible en el DOM. Se referencian con:
+       <svg><use href="#fatlin-emblem"></use></svg>
+════════════════════════════════════════════════════════ -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none;" aria-hidden="true">
+
+  <!-- ── Emblema Fatlin (rombo de capas) ── viewBox: 0 0 100 100 -->
+  <symbol id="fatlin-emblem" viewBox="0 0 100 100">
+    <defs>
+      <filter id="sym-glow">
+        <feGaussianBlur stdDeviation="1.5" result="cb"/>
+        <feMerge><feMergeNode in="cb"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+    <path d="M50 90 L90 70 L50 50 L10 70 Z" fill="#075985"/>
+    <path d="M50 82 L90 62 L50 42 L10 62 Z" fill="#0369a1"/>
+    <path d="M50 74 L90 54 L50 34 L10 54 Z" fill="#0284c7"/>
+    <path d="M50 66 L90 46 L50 26 L10 46 Z" fill="#0ea5e9"/>
+    <path d="M50 58 L90 38 L50 18 L10 38 Z" fill="#38bdf8"/>
+    <path d="M50 50 L75 38 L50 26 L25 38 Z" fill="#7dd3fc" filter="url(#sym-glow)">
+      <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite"/>
+    </path>
+    <circle cx="50" cy="38" r="3" fill="white" opacity="0.8">
+      <animate attributeName="r" values="2;4;2" dur="3s" repeatCount="indefinite"/>
+    </circle>
+  </symbol>
+
+  <!-- ── Emblema Fatlin pequeño (sin animación, para auth y reward) ── -->
+  <symbol id="fatlin-emblem-static" viewBox="0 0 100 100">
+    <path d="M50 90 L85 75 L50 60 L15 75 Z" fill="#0369a1"/>
+    <path d="M50 80 L85 65 L50 50 L15 65 Z" fill="#0284c7"/>
+    <path d="M50 70 L85 55 L50 40 L15 55 Z" fill="#0ea5e9"/>
+    <path d="M50 60 L85 45 L50 30 L15 45 Z" fill="#38bdf8"/>
+    <path d="M50 52 L72 41 L50 30 L28 41 Z" fill="#7dd3fc"/>
+    <circle cx="50" cy="41" r="2" fill="white" opacity="0.7"/>
+  </symbol>
+
+  <!-- ── Emblema Descanso (ícono luna + estrella para modal-rest) ── -->
+  <symbol id="rest-emblem" viewBox="0 0 100 100">
+    <path d="M50 90 L90 70 L50 50 L10 70 Z" fill="#075985" opacity="0.6"/>
+    <path d="M50 82 L90 62 L50 42 L10 62 Z" fill="#0369a1" opacity="0.7"/>
+    <path d="M50 74 L90 54 L50 34 L10 54 Z" fill="#0284c7" opacity="0.8"/>
+    <path d="M50 66 L90 46 L50 26 L10 46 Z" fill="#0ea5e9"/>
+    <path d="M50 58 L90 38 L50 18 L10 38 Z" fill="#38bdf8"/>
+    <path d="M50 50 L75 38 L50 26 L25 38 Z" fill="#93c5fd">
+      <animate attributeName="opacity" values="0.6;1;0.6" dur="3s" repeatCount="indefinite"/>
+    </path>
+    <!-- Luna -->
+    <path d="M50 44 Q56 36 64 38 Q54 30 44 38 Q42 44 50 44Z" fill="white" opacity="0.9"/>
+    <!-- Estrella central -->
+    <circle cx="50" cy="38" r="2.5" fill="white" opacity="0.9">
+      <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/>
+    </circle>
+  </symbol>
+
+  <!-- ── Nodo de mapa — desbloqueado ── -->
+  <symbol id="node-locked" viewBox="0 0 24 24">
+    <rect x="3" y="11" width="18" height="11" rx="2" fill="none" stroke="white" stroke-width="2.5" opacity=".4"/>
+    <path d="M7 11V7a5 5 0 0 1 10 0v4" fill="none" stroke="white" stroke-width="2.5" opacity=".4"/>
+  </symbol>
+
+  <!-- ── Nodo de mapa — completado (check) ── -->
+  <symbol id="node-check" viewBox="0 0 24 24">
+    <polyline points="20,6 9,17 4,12" fill="none" stroke="white" stroke-width="3"/>
+  </symbol>
+
+  <!-- ── Icono cerrar (X) ── -->
+  <symbol id="icon-close" viewBox="0 0 24 24">
+    <line x1="18" y1="6" x2="6" y2="18" stroke="#64748b" stroke-width="2.5"/>
+    <line x1="6" y1="6" x2="18" y2="18" stroke="#64748b" stroke-width="2.5"/>
+  </symbol>
+
+  <!-- ── Icono ojo (password toggle) ── -->
+  <symbol id="icon-eye" viewBox="0 0 24 24">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" fill="none" stroke="currentColor" stroke-width="2"/>
+    <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/>
+  </symbol>
+
+  <!-- ── Icono ranking (barras) ── -->
+  <symbol id="icon-ranking" viewBox="0 0 24 24">
+    <line x1="18" y1="20" x2="18" y2="10" stroke="currentColor" stroke-width="2.5"/>
+    <line x1="12" y1="20" x2="12" y2="4" stroke="currentColor" stroke-width="2.5"/>
+    <line x1="6" y1="20" x2="6" y2="14" stroke="currentColor" stroke-width="2.5"/>
+  </symbol>
+
+  <!-- ── Icono usuario ── -->
+  <symbol id="icon-user" viewBox="0 0 24 24">
+    <circle cx="12" cy="8" r="4" fill="none" stroke="#94a3b8" stroke-width="2.5"/>
+    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" fill="none" stroke="#94a3b8" stroke-width="2.5"/>
+  </symbol>
+
+</svg>
+
+<!-- BANNER DE ACTUALIZACIÓN PWA -->
+<div id="update-banner">
+    <span>🔄 Hay una nueva versión disponible</span>
+    <div style="display:flex;gap:8px">
+        <button id="btn-update-reload">Actualizar</button>
+        <button id="btn-update-dismiss">✕</button>
+    </div>
+</div>
+
+<!-- ESTRELLAS GALA -->
+<div id="gala-stars"></div>
+
+<!-- SPLASH -->
+<div id="splash">
+    <div class="logo-float">
+        <!-- Emblema Fatlin animado — sprite SVG reutilizable -->
+        <svg width="130" height="130" aria-label="Fatlin AI">
+          <use href="#fatlin-emblem"></use>
+        </svg>
+    </div>
+    <p class="brand">Fatlin AI</p>
+    <p class="sub">Metodología PACIE &nbsp;·&nbsp; PACIE Methodology</p>
+    <div id="lang-splash">
+        <button class="lang-btn" id="ls-es" onclick="splashChooseLang('es')">
+            <span class="lang-flag">🇪🇸</span>
+            <span class="lang-label">
+                <span class="lang-label-main">Español</span>
+                <span class="lang-label-sub">Jugar en español</span>
+            </span>
+        </button>
+        <button class="lang-btn" id="ls-en" onclick="splashChooseLang('en')">
+            <span class="lang-flag">🇺🇸</span>
+            <span class="lang-label">
+                <span class="lang-label-main">English</span>
+                <span class="lang-label-sub">Play in English</span>
+            </span>
+        </button>
+    </div>
+</div>
+
+<!-- AUTH -->
+<div id="auth-screen">
+    <div class="auth-card">
+        <div style="display:flex;justify-content:center;margin-bottom:1.25rem">
+            <svg width="52" height="52" viewBox="0 0 100 100"><path d="M50 90 L85 75 L50 60 L15 75 Z" fill="#0369a1"/><path d="M50 80 L85 65 L50 50 L15 65 Z" fill="#0284c7"/><path d="M50 70 L85 55 L50 40 L15 55 Z" fill="#0ea5e9"/><path d="M50 60 L85 45 L50 30 L15 45 Z" fill="#38bdf8"/><path d="M50 52 L72 41 L50 30 L28 41 Z" fill="#7dd3fc"/><circle cx="50" cy="41" r="2" fill="white" opacity="0.7"/></svg>
+        </div>
+        <h1 style="font-size:1.9rem;font-weight:800;color:#1e293b;margin-bottom:.25rem">Fatlin AI</h1>
+        <p style="color:#94a3b8;font-size:.85rem;margin-bottom:1.75rem">Gestión Educativa Inteligente</p>
+        <div id="auth-main">
+            <button id="btn-google" class="abtn google"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>Continuar con Google</button>
+            <button id="btn-show-email" class="abtn email"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>Correo electrónico</button>
+        </div>
+        <div id="auth-email" style="display:none">
+            <input type="email" id="inp-email" class="ifield" placeholder="Correo">
+            <div style="position:relative"><input type="password" id="inp-pass" class="ifield" placeholder="Contraseña" style="margin-bottom:.5rem"><button id="btn-eye" style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;color:#94a3b8;padding:4px"><svg id="eye-ico" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+            <label class="cc" style="text-align:left;padding-left:.25rem"><input type="checkbox" id="chk-rem"><div class="ck"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5"><polyline points="20,6 9,17 4,12"/></svg></div><span style="font-size:.85rem;font-weight:600;color:#64748b">Recordar credenciales</span></label>
+            <button id="btn-login" class="abtn primary" style="margin-top:.5rem">Entrar / Registrar</button>
+            <button id="btn-back" style="background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:.75rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.15em;margin-top:.25rem">← Volver</button>
+        </div>
+    </div>
+</div>
+
+<!-- GAME -->
+<!-- ── MODAL ONBOARDING ─────────────────────────────────────────── -->
+<div id="modal-onboarding">
+  <div class="ob-card">
+    <div id="ob-screen-1">
+      <div class="ob-logo" style="position:relative;display:inline-block;margin-bottom:.75rem">
+  <svg width="110" height="130" viewBox="0 0 100 120" style="filter:drop-shadow(0 0 18px rgba(14,165,233,.7))">
+    <defs>
+      <filter id="glow1"><feGaussianBlur stdDeviation="2" result="cb"/><feMerge><feMergeNode in="cb"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <!-- Pulso de anillos -->
+      <radialGradient id="pulse1" cx="50%" cy="50%"><stop offset="0%" stop-color="#0ea5e9" stop-opacity=".6"/><stop offset="100%" stop-color="#0ea5e9" stop-opacity="0"/></radialGradient>
+    </defs>
+    <!-- Anillos de pulso animados -->
+    <circle cx="50" cy="72" r="10" fill="none" stroke="#38bdf8" stroke-width="1.5" opacity="0">
+      <animate attributeName="r" values="10;45" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.7;0" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="50" cy="72" r="10" fill="none" stroke="#0ea5e9" stroke-width="1" opacity="0">
+      <animate attributeName="r" values="10;45" dur="2s" begin="0.7s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.5;0" dur="2s" begin="0.7s" repeatCount="indefinite"/>
+    </circle>
+    <!-- Emblema Fatlin — capas del rombo -->
+    <path d="M50 105 L85 87 L50 69 L15 87 Z" fill="#075985"/>
+    <path d="M50 97 L85 79 L50 61 L15 79 Z" fill="#0369a1"/>
+    <path d="M50 89 L85 71 L50 53 L15 71 Z" fill="#0284c7"/>
+    <path d="M50 81 L85 63 L50 45 L15 63 Z" fill="#0ea5e9"/>
+    <path d="M50 73 L85 55 L50 37 L15 55 Z" fill="#38bdf8"/>
+    <path d="M50 65 L72 54 L50 43 L28 54 Z" fill="#7dd3fc" filter="url(#glow1)">
+      <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite"/>
+    </path>
+    <circle cx="50" cy="54" r="3" fill="white" opacity="0.9">
+      <animate attributeName="r" values="2;4;2" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <!-- Birrete encima del emblema -->
+    <!-- Base del birrete (tablero) -->
+    <rect x="30" y="16" width="40" height="5" rx="2" fill="#1e293b"/>
+    <!-- Tabla cuadrada del birrete -->
+    <rect x="28" y="9" width="44" height="9" rx="2" fill="#0f172a"/>
+    <rect x="30" y="10" width="40" height="7" rx="1.5" fill="#1e3a5f"/>
+    <!-- Cruz dorada en el birrete -->
+    <line x1="50" y1="10" x2="50" y2="17" stroke="#fbbf24" stroke-width="1.5"/>
+    <line x1="44" y1="13.5" x2="56" y2="13.5" stroke="#fbbf24" stroke-width="1.5"/>
+    <!-- Borla del birrete -->
+    <line x1="68" y1="14" x2="68" y2="24" stroke="#fbbf24" stroke-width="1.5"/>
+    <circle cx="68" cy="25" r="3" fill="#fbbf24">
+      <animate attributeName="cy" values="25;28;25" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <!-- Banda del birrete -->
+    <path d="M35 21 Q50 26 65 21" stroke="#38bdf8" stroke-width="1.5" fill="none"/>
+  </svg>
+</div>
+      <div class="ob-title">¡Bienvenido a tu evolución como Tutor!</div>
+      <div class="ob-subtitle">Fatlin AI · Metodología PACIE<br>Avalado por Planeta FATLA y ASOMTV</div>
+      <div class="ob-body">Has ingresado al ecosistema de <strong style="color:#63b3ed">Fatlin AI</strong>. Tu conocimiento sobre la Metodología PACIE se pondrá a prueba en un entorno de alto rendimiento.<br><br>¿Estás listo para alcanzar la <strong style="color:#34d399">excelencia digital</strong>?</div>
+      <div class="ob-dots"><div class="ob-dot active"></div><div class="ob-dot"></div><div class="ob-dot"></div></div>
+      <button class="ob-btn" onclick="obNext(2)">¡Comenzar mi evolución! →</button>
+    </div>
+    <div id="ob-screen-2" style="display:none">
+      <div class="ob-logo" style="position:relative;display:inline-block;margin-bottom:.75rem">
+  <svg width="110" height="115" viewBox="0 0 100 105" style="filter:drop-shadow(0 0 14px rgba(14,165,233,.5))">
+    <defs>
+      <filter id="glow2"><feGaussianBlur stdDeviation="2" result="cb"/><feMerge><feMergeNode in="cb"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <filter id="heartglow"><feGaussianBlur stdDeviation="3" result="cb"/><feMerge><feMergeNode in="cb"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+    <!-- Emblema Fatlin — capas del rombo (protagonista de fondo) -->
+    <path d="M50 97 L85 79 L50 61 L15 79 Z" fill="#075985"/>
+    <path d="M50 89 L85 71 L50 53 L15 71 Z" fill="#0369a1"/>
+    <path d="M50 81 L85 63 L50 45 L15 63 Z" fill="#0284c7"/>
+    <path d="M50 73 L85 55 L50 37 L15 55 Z" fill="#0ea5e9"/>
+    <path d="M50 65 L85 47 L50 29 L15 47 Z" fill="#38bdf8"/>
+    <path d="M50 57 L72 46 L50 35 L28 46 Z" fill="#7dd3fc" filter="url(#glow2)">
+      <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite"/>
+    </path>
+    <circle cx="50" cy="46" r="3" fill="white" opacity="0.9">
+      <animate attributeName="r" values="2;4;2" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <!-- Corazón pequeño delante (centro-inferior del emblema) -->
+    <g filter="url(#heartglow)" transform="translate(50,68)">
+      <path d="M0,-9 C-2,-13 -9,-13 -9,-6 C-9,0 0,7 0,7 C0,7 9,0 9,-6 C9,-13 2,-13 0,-9 Z"
+            fill="#ef4444">
+        <animate attributeName="d"
+          values="M0,-9 C-2,-13 -9,-13 -9,-6 C-9,0 0,7 0,7 C0,7 9,0 9,-6 C9,-13 2,-13 0,-9 Z;
+                  M0,-10 C-2,-15 -11,-15 -11,-7 C-11,1 0,9 0,9 C0,9 11,1 11,-7 C11,-15 2,-15 0,-10 Z;
+                  M0,-9 C-2,-13 -9,-13 -9,-6 C-9,0 0,7 0,7 C0,7 9,0 9,-6 C9,-13 2,-13 0,-9 Z"
+          dur="1.2s" repeatCount="indefinite"/>
+      </path>
+      <!-- Brillo en el corazón -->
+      <ellipse cx="-3" cy="-5" rx="2.5" ry="1.5" fill="white" opacity="0.4" transform="rotate(-30,-3,-5)"/>
+    </g>
+  </svg>
+</div>
+      <div class="ob-title">El Camino del Experto es Preciso</div>
+      <div class="ob-subtitle">Vidas y Precisión</div>
+      <div class="ob-body">Tienes <strong style="color:#f87171">5 Vidas</strong> para avanzar. Si cometes <strong style="color:#fbbf24">2 errores consecutivos</strong>, el sistema reiniciará tu nivel actual para que el concepto quede grabado en tu ADN pedagógico.<br><br><em style="color:rgba(186,230,253,.7)">¡El error es aprendizaje, pero la persistencia es maestría!</em></div>
+      <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot active"></div><div class="ob-dot"></div></div>
+      <button class="ob-btn" onclick="obNext(3)">Entendido, ¡adelante! →</button>
+    </div>
+    <div id="ob-screen-3" style="display:none">
+      <div class="ob-logo" style="position:relative;display:inline-block;margin-bottom:.75rem">
+  <svg width="110" height="130" viewBox="0 0 100 120" style="filter:drop-shadow(0 0 20px rgba(251,191,36,.5))">
+    <defs>
+      <filter id="glow3"><feGaussianBlur stdDeviation="2" result="cb"/><feMerge><feMergeNode in="cb"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <filter id="rayglow"><feGaussianBlur stdDeviation="4" result="cb"/><feMerge><feMergeNode in="cb"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+    <!-- Destello de energía detrás del rayo -->
+    <ellipse cx="50" cy="22" rx="18" ry="12" fill="#fbbf24" opacity="0.12">
+      <animate attributeName="opacity" values="0.08;0.22;0.08" dur="1.5s" repeatCount="indefinite"/>
+      <animate attributeName="rx" values="18;24;18" dur="1.5s" repeatCount="indefinite"/>
+    </ellipse>
+    <!-- Emblema Fatlin — capas del rombo -->
+    <path d="M50 108 L85 90 L50 72 L15 90 Z" fill="#075985"/>
+    <path d="M50 100 L85 82 L50 64 L15 82 Z" fill="#0369a1"/>
+    <path d="M50 92 L85 74 L50 56 L15 74 Z" fill="#0284c7"/>
+    <path d="M50 84 L85 66 L50 48 L15 66 Z" fill="#0ea5e9"/>
+    <path d="M50 76 L85 58 L50 40 L15 58 Z" fill="#38bdf8"/>
+    <path d="M50 68 L72 57 L50 46 L28 57 Z" fill="#7dd3fc" filter="url(#glow3)">
+      <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite"/>
+    </path>
+    <circle cx="50" cy="57" r="3" fill="white" opacity="0.9">
+      <animate attributeName="r" values="2;4;2" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <!-- Rayo arriba del emblema -->
+    <g filter="url(#rayglow)">
+      <!-- Rayo principal -->
+      <polygon points="54,8 44,28 52,28 46,48 62,22 53,22" fill="#fbbf24">
+        <animate attributeName="opacity" values="1;0.6;1" dur="1.2s" repeatCount="indefinite"/>
+      </polygon>
+      <!-- Destello blanco en el rayo -->
+      <polygon points="54,8 48,22 53,22 50,32 58,18 53,18" fill="white" opacity="0.5">
+        <animate attributeName="opacity" values="0.5;0.9;0.5" dur="1.2s" repeatCount="indefinite"/>
+      </polygon>
+    </g>
+    <!-- Chispas alrededor del rayo -->
+    <circle cx="38" cy="20" r="2" fill="#fbbf24" opacity="0">
+      <animate attributeName="opacity" values="0;1;0" dur="1.5s" begin="0.3s" repeatCount="indefinite"/>
+      <animate attributeName="r" values="1;3;1" dur="1.5s" begin="0.3s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="64" cy="25" r="1.5" fill="#fde68a" opacity="0">
+      <animate attributeName="opacity" values="0;1;0" dur="1.5s" begin="0.8s" repeatCount="indefinite"/>
+      <animate attributeName="r" values="1;2.5;1" dur="1.5s" begin="0.8s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="42" cy="38" r="1.5" fill="#fbbf24" opacity="0">
+      <animate attributeName="opacity" values="0;0.8;0" dur="1.8s" begin="1.1s" repeatCount="indefinite"/>
+    </circle>
+  </svg>
+</div>
+      <div class="ob-title">Escala hasta el Círculo de Eminencias</div>
+      <div class="ob-subtitle">Las 10 Ligas Exponenciales</div>
+      <table class="ob-liga-table">
+        <tr><th>#</th><th>Liga</th><th>Ascenso semanal</th></tr>
+        <tr><td>1</td><td>🌱 Aspirantes Digitales</td><td>Top 20</td></tr>
+        <tr><td>2</td><td>📚 Tutores en Adiestramiento</td><td>Top 15</td></tr>
+        <tr><td>3</td><td>🎯 Especialistas en Presencia</td><td>Top 12</td></tr>
+        <tr><td>4</td><td>🏗️ Arquitectos de Alcance</td><td>Top 10</td></tr>
+        <tr><td>5</td><td>🎓 Mentores de Capacitación</td><td>Top 8</td></tr>
+        <tr><td>6</td><td>⚡ Maestros de la Interacción</td><td>Top 6</td></tr>
+        <tr><td>7</td><td>🔬 Tecnopedagogos de Élite</td><td>Top 5 · -20pts</td></tr>
+        <tr><td>8</td><td>🌍 Consultores OMVT</td><td>Top 4 · -40pts</td></tr>
+        <tr><td>9</td><td>🧠 Sabios del Planeta FATLA</td><td>Top 3 · -75pts</td></tr>
+        <tr><td>10</td><td>👑 Círculo de Eminencias</td><td>Top 3 · -120pts</td></tr>
+      </table>
+      <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot active"></div></div>
+      <button class="ob-btn" onclick="obFinish()">¡Que comience la batalla! ⚔️</button>
+      <button class="ob-skip" onclick="obFinish()">Omitir introducción</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL ASCENSO DE LIGA ─────────────────────────────────────── -->
+<div id="modal-liga-up">
+  <div class="ligaup-card">
+    <span class="ligaup-badge">⬆ ¡Ascendiste de Liga!</span>
+    <div id="lu-shield" class="ligaup-shield">🛡️</div>
+    <div id="lu-name" class="ligaup-name">Liga</div>
+    <div id="lu-sub" class="ligaup-sub">Subtítulo</div>
+    <div class="ligaup-rule" id="lu-rule">📋 Reglas</div>
+    <div class="ligaup-tip" id="lu-tip">💡 Consejo</div>
+    <button class="ligaup-btn" onclick="closeLigaUp()">¡Acepto el desafío! 🚀</button>
+  </div>
+</div>
+
+<!-- ── TIP BUBBLE ─────────────────────────────────────────────────── -->
+<div id="liga-tip-bubble">
+  <button class="tip-close" onclick="document.getElementById('liga-tip-bubble').classList.remove('visible')">✕</button>
+  <div class="tip-header"><span style="font-size:1.1rem">🤖</span><span class="tip-label">Tip de Fatlin AI</span></div>
+  <div class="tip-text" id="liga-tip-text"></div>
+</div>
+
+
+<!-- ── MODAL POLÍTICA DE PRIVACIDAD ─────────────────────────── -->
+<div id="modal-privacy">
+  <div class="privacy-card">
+    <div class="privacy-header">
+      <div class="privacy-logo">
+        <svg width="30" height="30" viewBox="0 0 100 100">
+          <path d="M50 92 L86 73 L50 54 L14 73 Z" fill="#075985"/>
+          <path d="M50 83 L86 64 L50 45 L14 64 Z" fill="#0369a1"/>
+          <path d="M50 74 L86 55 L50 36 L14 55 Z" fill="#0284c7"/>
+          <path d="M50 65 L86 46 L50 27 L14 46 Z" fill="#0ea5e9"/>
+          <path d="M50 56 L72 45 L50 34 L28 45 Z" fill="#7dd3fc">
+            <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite"/>
+          </path>
+          <circle cx="50" cy="45" r="3.5" fill="white" opacity=".9">
+            <animate attributeName="r" values="2.5;4;2.5" dur="3s" repeatCount="indefinite"/>
+          </circle>
+        </svg>
+        <span class="privacy-logo-text">Fatlin AI</span>
+      </div>
+      <div class="privacy-title">🔒 Política de Privacidad</div>
+      <div class="privacy-date">Última actualización: marzo 2026 · v1.0</div>
+    </div>
+    <div class="privacy-body" id="privacy-body">
+      <p>Fatlin AI <em>("nosotros", "nuestro" o "la Aplicación")</em> se compromete a proteger la privacidad de sus usuarios. Esta política describe cómo manejamos la información en el marco de nuestra plataforma gamificada de aprendizaje sobre la <strong>Metodología PACIE</strong>, con el respaldo de <strong>Planeta FATLA</strong> y <strong>ASOMTV</strong>.</p>
+      <h3>1. Información que Recopilamos</h3>
+      <p>Para el funcionamiento de la gamificación y el ranking, recopilamos:</p>
+      <ul>
+        <li><strong>Datos de Perfil:</strong> Nombre de usuario o pseudónimo, país y foto de perfil. Si inicias sesión con Google, tu foto de perfil de Google se usa automáticamente para personalizar tu experiencia; puedes cambiarla en cualquier momento desde el selector de avatar.</li>
+        <li><strong>Progreso Académico:</strong> Puntuaciones, niveles completados, rachas de estudio y diplomas obtenidos.</li>
+        <li><strong>Datos Técnicos:</strong> Identificadores de dispositivo, modelo de hardware y versión del sistema operativo.</li>
+      </ul>
+      <h3>2. Uso de la Información</h3>
+      <p>La información se utiliza exclusivamente para:</p>
+      <ul>
+        <li>Gestionar el <strong>Ranking Semanal</strong> y las <strong>Ligas Exponenciales</strong>.</li>
+        <li>Generar los <strong>Diplomas Micro-curriculares</strong> personalizados.</li>
+        <li>Sincronizar el progreso del usuario en diferentes dispositivos.</li>
+        <li>Mejorar la experiencia de aprendizaje mediante analítica anónima.</li>
+      </ul>
+      <h3>3. Publicidad y Terceros (AdMob)</h3>
+      <p>Fatlin AI utiliza <strong>Google AdMob</strong> para mostrar anuncios. Google puede utilizar identificadores de publicidad para mostrar anuncios relevantes basados en tus intereses.</p>
+      <ul>
+        <li>Puedes gestionar las preferencias de anuncios en la configuración de tu dispositivo.</li>
+        <li>No compartimos tu nombre real ni tus datos académicos específicos con los anunciantes.</li>
+      </ul>
+      <h3>4. Almacenamiento y Seguridad</h3>
+      <p>Sus datos se almacenan de forma segura en <strong>Firebase (Google Cloud)</strong>. Implementamos medidas de seguridad técnicas para evitar el acceso no autorizado o la pérdida de datos.</p>
+      <h3>5. Menores de Edad</h3>
+      <p>Nuestros contenidos están dirigidos a <strong>profesionales de la educación</strong> que están en proceso de formarse en áreas clave con vocación hacia la educación, acorde a las áreas de mejoramiento profesional de la comunidad virtual <strong>Planeta FATLA</strong> y/o <strong>tutores virtuales</strong>. No recopilamos conscientemente datos de menores de 13 años o la edad mínima legal en su país.</p>
+      <h3>6. Derechos del Usuario</h3>
+      <ul>
+        <li>Acceder, rectificar o eliminar su cuenta y datos en cualquier momento desde los ajustes de la app.</li>
+        <li>Retirar su consentimiento en cualquier momento sin efecto retroactivo.</li>
+        <li>Solicitar la baja de nuestra base de datos contactando a nuestro equipo de soporte.</li>
+      </ul>
+      <h3>7. Cambios en esta Política</h3>
+      <p>Nos reservamos el derecho de actualizar esta política. <strong>Se notificará a los usuarios a través de la aplicación</strong> y se solicitará nueva aceptación si los cambios son sustanciales.</p>
+    </div>
+    <div class="privacy-scroll-hint" id="privacy-scroll-hint">📜 Desplázate para leer toda la política antes de aceptar ↓</div>
+    <div class="privacy-footer">
+      <label class="privacy-check-row" id="privacy-check-row" for="chk-privacy">
+        <input type="checkbox" id="chk-privacy" onchange="onPrivacyCheck()">
+        <span class="privacy-check-label">He leído y acepto la <strong>Política de Privacidad</strong> de Fatlin AI y consiento el tratamiento de mis datos para los fines descritos.</span>
+      </label>
+      <button class="privacy-accept-btn" id="btn-privacy-accept" onclick="acceptPrivacy()" disabled>✅ Acepto y continuar</button>
+      <span class="privacy-decline-link" onclick="declinePrivacy()">No acepto — salir de la app</span>
+    </div>
+  </div>
+</div>
+
+<div id="game-container">
+    <div id="game-hud">
+        <div class="hud-inner">
+            <div id="hud-avatar" title="Cambiar avatar" data-i18n-title="hud_avatar">🧑</div>
+            <div class="hstat">
+                <span style="font-size:1rem">❤️</span>
+                <span id="stat-lives" style="font-weight:700;color:#334155">5</span>
+                <span id="stat-timer"></span>
+            </div>
+            <div class="hdiv"></div>
+            <div class="hstat"><span style="font-size:1rem">⭐</span><span id="stat-stars" style="font-weight:700;color:#334155">0</span></div>
+            <div class="hdiv"></div>
+            <div id="streak-bar">
+                <div class="streak-dot" id="sd0"></div>
+                <div class="streak-dot" id="sd1"></div>
+                <div class="streak-dot" id="sd2"></div>
+                <div class="streak-dot" id="sd3"></div>
+                <div class="streak-dot" id="sd4"></div>
+            </div>
+            <div class="hdiv"></div>
+            <div class="hstat"><span style="font-size:1rem">🏆</span><span id="stat-level" style="font-weight:700;color:#334155">Nv.1</span></div>
+
+            <div class="hdiv hdiv-new"></div>
+            <div id="stat-shields" class="hstat">
+                <span class="shield-icon">🛡️</span>
+                <span id="stat-shields-count" style="font-weight:700;color:#7c3aed">0</span>
+            </div>
+            <div class="hdiv hdiv-new" id="hdiv-streak"></div>
+            <div id="stat-streak" class="hstat">
+                <span style="font-size:1rem">🔥</span>
+                <span id="stat-streak-count" style="font-weight:700;color:#ea580c">0d</span>
+            </div>
+            <div class="hdiv hdiv-new" id="hdiv-gala"></div>
+            <span id="gala-badge">✨ GALA <span id="gala-timer"></span></span>
+            <div class="hdiv"></div>
+            <div class="hstat" style="max-width:80px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" style="flex-shrink:0"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span id="stat-user" style="font-size:11px;font-weight:700;color:#1e293b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">...</span></div>
+            <div style="display:flex;gap:4px">
+                <button id="btn-logros" class="hbtn" style="background:#f0fdf4;color:#16a34a" title="Mis Logros" onclick="openLogros()">🏅</button>
+                <button id="btn-ranking" class="hbtn" style="background:#fef3c7;color:#b45309"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></button>
+                <button id="btn-gocur" class="hbtn" style="background:#e0f2fe;color:#0284c7"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/><circle cx="12" cy="10" r="2.5"/></svg></button>
+                <div id="hud-lang">
+                    <button class="hud-lang-opt active" id="hl-es" onclick="setLang('es',this,'hud')">ES</button>
+                    <button class="hud-lang-opt" id="hl-en" onclick="setLang('en',this,'hud')">EN</button>
+                </div>
+                <button id="btn-shop" class="hbtn" style="background:#fef3c7;color:#d97706" title="Tienda" data-i18n-title="hud_shop">🛡️</button>
+                <button id="btn-account" class="hbtn" style="background:#f1f5f9;color:#64748b"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+            </div>
+        </div>
+    </div>
+    <div id="map-scroll"><svg id="path-svg"></svg><div id="nodes-container"></div></div>
+    <div id="scroll-hint" data-i18n="scroll_hint">🖱️ Rueda del mouse para explorar</div>
+</div>
+
+<!-- MASCOTA FATLIN (visible durante el juego) -->
+<div id="fatlin-mascot" title="Fatlin AI">
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="fglow"><feGaussianBlur stdDeviation="2" result="cb"/><feMerge><feMergeNode in="cb"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <radialGradient id="fbg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(56,189,248,.15)"/>
+      <stop offset="100%" stop-color="rgba(56,189,248,0)"/>
+    </radialGradient>
+  </defs>
+  <circle cx="50" cy="50" r="48" fill="url(#fbg)"/>
+  <path d="M50 90 L90 70 L50 50 L10 70 Z" fill="#075985"/>
+  <path d="M50 82 L90 62 L50 42 L10 62 Z" fill="#0369a1"/>
+  <path d="M50 74 L90 54 L50 34 L10 54 Z" fill="#0284c7"/>
+  <path d="M50 66 L90 46 L50 26 L10 46 Z" fill="#0ea5e9"/>
+  <path d="M50 58 L90 38 L50 18 L10 38 Z" fill="#38bdf8"/>
+  <path d="M50 50 L75 38 L50 26 L25 38 Z" fill="#7dd3fc" filter="url(#fglow)"/>
+  <circle cx="50" cy="38" r="3.5" fill="white" opacity="0.9"/>
+</svg>
+</div>
+<div id="mascot-zzz">Zzz</div>
+
+<!-- CELEBRACIÓN CADA 5 NIVELES -->
+<div id="level5-blast">
+    <div id="blast-halo"></div>
+    <div id="blast-emblem"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="fglow"><feGaussianBlur stdDeviation="2" result="cb"/><feMerge><feMergeNode in="cb"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <radialGradient id="fbg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(56,189,248,.15)"/>
+      <stop offset="100%" stop-color="rgba(56,189,248,0)"/>
+    </radialGradient>
+  </defs>
+  <circle cx="50" cy="50" r="48" fill="url(#fbg)"/>
+  <path d="M50 90 L90 70 L50 50 L10 70 Z" fill="#075985"/>
+  <path d="M50 82 L90 62 L50 42 L10 62 Z" fill="#0369a1"/>
+  <path d="M50 74 L90 54 L50 34 L10 54 Z" fill="#0284c7"/>
+  <path d="M50 66 L90 46 L50 26 L10 46 Z" fill="#0ea5e9"/>
+  <path d="M50 58 L90 38 L50 18 L10 38 Z" fill="#38bdf8"/>
+  <path d="M50 50 L75 38 L50 26 L25 38 Z" fill="#7dd3fc" filter="url(#fglow)"/>
+  <circle cx="50" cy="38" r="3.5" fill="white" opacity="0.9"/>
+</svg></div>
+    <div id="blast-text" id="blast-level-txt">¡Nivel 5 completado! ⭐</div>
+</div>
+
+<!-- MODAL CHALLENGE -->
+<div id="modal-challenge" class="modal-overlay">
+    <div class="challenge-card" id="ccard">
+        <div class="fatlin-mini">
+            <svg width="96" height="96" viewBox="0 0 100 100" style="filter:drop-shadow(0 8px 18px rgba(0,0,0,.35))"><path d="M50 90 L90 70 L50 50 L10 70 Z" fill="#075985"/><path d="M50 82 L90 62 L50 42 L10 62 Z" fill="#0369a1"/><path d="M50 74 L90 54 L50 34 L10 54 Z" fill="#0284c7"/><path d="M50 66 L90 46 L50 26 L10 46 Z" fill="#0ea5e9"/><path d="M50 58 L90 38 L50 18 L10 38 Z" fill="#38bdf8"/><path d="M50 50 L75 38 L50 26 L25 38 Z" fill="#7dd3fc"/><circle cx="50" cy="38" r="3" fill="white"/></svg>
+        </div>
+        <div id="ai-loading">
+            <div class="ai-spinner"></div>
+            <p id="ai-loading-msg" data-i18n="ai_loading">Consultando fuentes PACIE...</p>
+            <small id="ai-loading-sub">Generando preguntas con IA desde fatla.org y pacie.education</small>
+        </div>
+        <div id="feedback-float">
+            <p id="feedback-text" style="font-size:.85rem;font-weight:700"></p>
+            <div style="margin-top:.25rem;font-size:9px;text-transform:uppercase;letter-spacing:.1em;opacity:.7"><span data-i18n="life_lost">Vida perdida · El progreso se mantiene</span></div>
+            <div class="cbar"><div class="cfill" id="cfill" style="width:100%"></div></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:.5rem">
+            <div>
+                <p id="clabel" style="font-size:10px;font-weight:700;color:#0284c7;text-transform:uppercase;letter-spacing:.1em" data-i18n="challenge_label">Desafío PACIE</p>
+                <p id="replay-badge" style="font-size:10px;font-weight:700;color:#16a34a;text-transform:uppercase;letter-spacing:.1em;display:none" data-i18n-prefix="replaying">🔄 Repasando nivel <span id="replay-num"></span></p>
+            </div>
+            <div style="text-align:right">
+                <span id="txt-progress" style="font-size:1.1rem;font-weight:700;color:#1e293b">0/5</span>
+                <p style="font-size:9px;color:#94a3b8;margin-top:1px" data-i18n="hits_needed">aciertos necesarios</p>
+            </div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:center;margin-bottom:1rem">
+            <div class="streak-dot" id="cd0" style="width:16px;height:16px"></div>
+            <div class="streak-dot" id="cd1" style="width:16px;height:16px"></div>
+            <div class="streak-dot" id="cd2" style="width:16px;height:16px"></div>
+            <div class="streak-dot" id="cd3" style="width:16px;height:16px"></div>
+            <div class="streak-dot" id="cd4" style="width:16px;height:16px"></div>
+        </div>
+        <div class="q-counter" id="q-counter" style="font-size:.6rem;font-weight:700;color:rgba(100,116,139,.7);text-align:center;margin-bottom:.25rem;letter-spacing:.08em"></div>
+        <div id="q-fresh-badge" style="display:none;text-align:center;margin-bottom:.2rem"><span style="font-size:.58rem;font-weight:700;color:#6ee7b7;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);border-radius:20px;padding:1px 8px">✨ Nuevas preguntas</span></div>
+        <div class="q-difficulty-bar" id="q-diff-bar" style="display:flex;gap:3px;align-items:center;justify-content:center;margin:.2rem 0 .4rem"></div>
+        <div id="question-area">
+            <p id="source-badge"></p>
+            <p id="q-type-badge" style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.1em;text-align:center;margin-bottom:.5rem;display:none" data-i18n="true_false">Verdadero o Falso</p>
+            <h2 id="txt-q" style="font-size:1rem;font-weight:600;color:#1e293b;margin-bottom:1.25rem;line-height:1.55;text-align:center;letter-spacing:-.01em">...</h2>
+            <div id="opts-container"></div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL REWARD — emblema protagonista -->
+<div id="modal-reward">
+    <div class="reward-card" id="rcard">
+        <!-- Emblema central con anillo giratorio -->
+        <div id="reward-emblem-wrap">
+            <div id="reward-emblem-glow"></div>
+            <div id="reward-emblem-ring"></div>
+            <div id="reward-emblem-svg"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="fglow"><feGaussianBlur stdDeviation="2" result="cb"/><feMerge><feMergeNode in="cb"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <radialGradient id="fbg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="rgba(56,189,248,.15)"/>
+      <stop offset="100%" stop-color="rgba(56,189,248,0)"/>
+    </radialGradient>
+  </defs>
+  <circle cx="50" cy="50" r="48" fill="url(#fbg)"/>
+  <path d="M50 90 L90 70 L50 50 L10 70 Z" fill="#075985"/>
+  <path d="M50 82 L90 62 L50 42 L10 62 Z" fill="#0369a1"/>
+  <path d="M50 74 L90 54 L50 34 L10 54 Z" fill="#0284c7"/>
+  <path d="M50 66 L90 46 L50 26 L10 46 Z" fill="#0ea5e9"/>
+  <path d="M50 58 L90 38 L50 18 L10 38 Z" fill="#38bdf8"/>
+  <path d="M50 50 L75 38 L50 26 L25 38 Z" fill="#7dd3fc" filter="url(#fglow)"/>
+  <circle cx="50" cy="38" r="3.5" fill="white" opacity="0.9"/>
+</svg></div>
+        </div>
+        <!-- Título y mensaje -->
+        <h2 style="font-size:1.5rem;font-weight:800;color:white;margin:.25rem 0" id="r-title">¡Increíble!</h2>
+        <p style="color:#7dd3fc;font-size:.85rem;margin-bottom:1.25rem" id="r-msg">Has completado 10 niveles</p>
+        <!-- Badge de insignia -->
+        <div style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:1.25rem;padding:.85rem 1rem;margin-bottom:1.25rem">
+            <p style="color:white;font-weight:700;font-size:1rem" id="r-badge">🎖️ Explorador PACIE</p>
+            <p style="color:#93c5fd;font-size:.7rem;margin-top:.2rem" id="r-sub" data-i18n="badge_unlocked">Insignia desbloqueada</p>
+        </div>
+        <button id="btn-reward-close" class="wbtn primary" style="font-size:1rem;padding:1rem;border-radius:1.5rem" data-i18n="keep_going">¡Seguir escalando! 🚀</button>
+    </div>
+</div>
+
+<!-- MODAL RANKING -->
+<div id="modal-ranking">
+    <div class="rcard">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+            <h2 style="font-size:1.3rem;font-weight:800;color:#1e293b" data-i18n="ranking_title">🏆 Ranking</h2>
+            <button id="btn-close-ranking" style="background:#f1f5f9;border:none;cursor:pointer;padding:8px;border-radius:12px;display:flex"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="rtabs">
+            <button class="rtab active" id="tab-global" onclick="switchRankTab('global')" data-i18n="tab_global">🌍 Global (Top 25)</button>
+            <button class="rtab" id="tab-liga" onclick="switchRankTab('liga')" data-i18n="tab_league">⚡ Liga Semanal</button>
+        </div>
+        <div id="panel-global"><div id="ranking-list"><div class="ldots"><span></span><span></span><span></span></div></div></div>
+        <div id="panel-liga" style="display:none">
+            <div class="lhdr"><p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;opacity:.8;margin-bottom:.25rem">⚡ Liga Semanal PACIE</p><p style="font-weight:800;font-size:1.1rem" id="liga-week-lbl">Semana actual</p><div class="lcnt"><span id="liga-cnt">Calculando...</span></div></div>
+            <div class="ltop5"><p style="font-size:10px;font-weight:700;color:#fde68a;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem">🏅 Clasificados</p><div id="liga-top5"></div></div>
+            <p style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem">📊 Tabla Semanal</p>
+            <div id="liga-full"></div>
+            <div style="margin-top:1rem;background:#fffbeb;border:1px solid #fde68a;border-radius:.75rem;padding:.75rem;text-align:center"><p style="font-size:.75rem;font-weight:700;color:#b45309">Los 5 primeros de cada semana clasifican a la <strong>Liga PACIE</strong> ⚡</p><p style="font-size:.7rem;color:#d97706;margin-top:.25rem">Reinicio cada lunes 00:00</p></div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ACCOUNT -->
+<div id="modal-account">
+    <div class="accard">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+            <h2 style="font-size:1.3rem;font-weight:800;color:#1e293b" data-i18n="my_account">Mi Cuenta</h2>
+            <button id="btn-close-account" style="background:#f1f5f9;border:none;cursor:pointer;padding:8px;border-radius:12px;display:flex"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div style="background:#f0f9ff;border-radius:1.25rem;padding:1rem;margin-bottom:1.25rem;text-align:left">
+            <div style="display:flex;align-items:center;gap:.75rem">
+                <div id="acc-av" style="width:48px;height:48px;background:#bae6fd;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;border:2px solid #7dd3fc">🧑</div>
+                <div><p id="acc-name" style="font-weight:700;color:#1e293b;font-size:.9rem">Usuario</p><p id="acc-email" style="color:#94a3b8;font-size:.75rem">—</p></div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-top:.75rem">
+                <div style="background:white;border-radius:.75rem;padding:.6rem;text-align:center"><p id="acc-level" style="font-weight:800;color:#0284c7;font-size:1.1rem">1</p><p style="color:#94a3b8;font-size:10px">Nivel</p></div>
+                <div style="background:white;border-radius:.75rem;padding:.6rem;text-align:center"><p id="acc-stars" style="font-weight:800;color:#d97706;font-size:1.1rem">0</p><p style="color:#94a3b8;font-size:10px">Estrellas</p></div>
+                <div style="background:white;border-radius:.75rem;padding:.6rem;text-align:center"><p id="acc-badges" style="font-weight:800;color:#16a34a;font-size:1.1rem">0</p><p style="color:#94a3b8;font-size:10px">Insignias</p></div>
+            </div>
+        </div>
+        <button id="btn-chgav" class="wbtn purple"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>Cambiar Avatar</button>
+        <button id="btn-switch-acc" class="wbtn sky"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1,4 1,10 7,10"/><path d="M3.51 15a9 9 0 1 0 .49-3.78"/></svg>Cambiar de cuenta</button>
+        <button id="btn-new-acc" class="wbtn slate"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Registrar nueva cuenta</button>
+        <button id="btn-logout" class="wbtn red"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Cerrar sesión</button>
+    </div>
+</div>
+
+<!-- MODAL AVATAR -->
+<div id="modal-avatar">
+    <div class="avcard">
+        <h2 style="font-size:1.3rem;font-weight:800;color:#1e293b;margin-bottom:.25rem" data-i18n="pick_avatar">Elige tu Avatar</h2>
+        <p style="color:#94a3b8;font-size:.85rem;margin-bottom:.5rem" data-i18n="avatar_sub">Personaliza tu identidad en el juego</p>
+        <div class="avgrid" id="av-grid"></div>
+        <button id="btn-confirm-av" class="wbtn primary" data-i18n="confirm_avatar">Confirmar Avatar ✓</button>
+    </div>
+</div>
+
+<!-- MODAL DIPLOMA — nuevo diseño profesional -->
+<div id="modal-diploma">
+ <div class="diploma-wrap">
+
+  <!-- ═══ CERTIFICADO (marco azul oscuro + papel interno) ═══ -->
+  <div id="diploma-content">
+   <div class="cert-paper-inner">
+
+    <!-- ══ COLUMNA PRINCIPAL ══ -->
+    <div class="cert-col-main">
+
+     <!-- CABECERA -->
+     <div>
+      <div class="cer-head">
+       <!-- Sello dinámico (se inyecta por JS) -->
+       <div id="dip-seal-wrap" style="flex-shrink:0;"></div>
+       <div class="cer-head-text">
+        <p class="cer-issuer">Certificado oficial · Metodología PACIE · Educación Virtual Gamificada con IA</p>
+        <h1 class="cer-title" id="dip-cert-title">Certificado de Logro PACIE</h1>
+        <p class="cer-subtitle" id="dip-cert-subtitle">Acreditación Micro-curricular · Fatlin AI</p>
+        <div class="cer-chip" id="dip-chip">💎 Diamante &nbsp;·&nbsp; 250 Niveles</div>
+       </div>
+      </div>
+      <div class="cer-rule"></div>
+     </div>
+
+     <!-- SECCIÓN MEDIA -->
+     <div class="cer-mid">
+
+      <!-- Nombre -->
+      <div class="cer-name-box">
+       <p class="cer-certify-lbl">Este certificado acredita que ha completado satisfactoriamente</p>
+       <span class="cer-graduate-name" id="dip-name">Nombre del Usuario</span>
+       <p class="cer-name-role" id="dip-name-role">Nivel PACIE · Fatlin AI</p>
+      </div>
+
+      <!-- Logro -->
+      <p class="cer-achievement" id="dip-achievement">
+       Ha completado niveles de evaluación continua con Inteligencia Artificial sobre los contenidos
+       oficiales de la Metodología PACIE, acreditando módulos progresivos con mínimo 4 respuestas
+       correctas consecutivas por nivel, validado por FATLA, PACIE y ASOMTV.
+      </p>
+
+      <!-- Contenidos académicos -->
+      <div>
+       <div class="cer-contents-hdr">
+        <span class="cer-contents-lbl">Contenidos Académicos Acreditados</span>
+        <span class="cer-contents-badge" id="dip-modules-badge">Módulos ✅</span>
+       </div>
+       <div class="cer-topics-grid" id="dip-topics-grid">
+        <!-- se inyecta por JS según el tier -->
+       </div>
+      </div>
+
+     </div><!-- /cer-mid -->
+
+     <!-- PIE -->
+     <div>
+      <div class="cer-foot">
+       <div class="cer-orgs">
+
+        <!-- FATLA -->
+        <a class="cer-org" href="https://www.fatla.org" target="_blank" rel="noopener" title="Visitar FATLA · fatla.org">
+         <div class="cer-org-img">
+          <img src="https://www.fatla.net/mega/imacorp/2025/logos/planeta-fatla.png"
+               onerror="if(this._err)return;this._err=true;var p=this.parentElement;if(p)p.innerHTML='<svg viewBox=\'0 0 100 100\' style=\'width:80%;padding:4px\'><path d=\'M50 88 L82 70 L50 52 L18 70 Z\' fill=\'#0369a1\'/><path d=\'M50 79 L82 61 L50 43 L18 61 Z\' fill=\'#0284c7\'/><path d=\'M50 70 L82 52 L50 34 L18 52 Z\' fill=\'#0ea5e9\'/></svg>'" alt="FATLA">
+         </div>
+         <span class="cer-org-name">FATLA</span>
+         <span class="cer-org-sub">Fundación</span>
+        </a>
+        <div class="cer-org-div"></div>
+
+        <!-- PACIE -->
+        <a class="cer-org" href="https://www.pacie.education/portal/" target="_blank" rel="noopener" title="Visitar PACIE · pacie.education">
+         <div class="cer-org-img">
+          <img src="https://www.pacie.education/mega/pacie/logos/pacie-logo-oficial.png"
+               onerror="if(this._err)return;this._err=true;var p=this.parentElement;if(p)p.innerHTML='<span style=\'font-size:1.5rem\'>🎓</span>'" alt="PACIE">
+         </div>
+         <span class="cer-org-name">PACIE</span>
+         <span class="cer-org-sub">Metodología</span>
+        </a>
+        <div class="cer-org-div"></div>
+
+        <!-- ASOMTV -->
+        <a class="cer-org" href="https://www.asomtv.org" target="_blank" rel="noopener" title="Visitar ASOMTV · asomtv.org">
+         <div class="cer-org-img">
+          <img src="https://asomtv.org/mega/imacorp/2023/images/logo-asomtv.png"
+               onerror="if(this._err)return;this._err=true;var p=this.parentElement;if(p)p.innerHTML='<span style=\'font-size:1.5rem\'>🌐</span>'" alt="ASOMTV">
+         </div>
+         <span class="cer-org-name">ASOMTV</span>
+         <span class="cer-org-sub">Asociación</span>
+        </a>
+        <div class="cer-org-div"></div>
+
+        <!-- Fatlin AI SVG -->
+        <a class="cer-org" href="https://fatlin.web.app" target="_blank" rel="noopener" title="Fatlin AI · fatlin.web.app">
+         <div class="cer-org-img" style="background:white;">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;padding:4px">
+           <defs><filter id="flglow2"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+           <path d="M50 88 L82 70 L50 52 L18 70 Z" fill="#0369a1"/>
+           <path d="M50 79 L82 61 L50 43 L18 61 Z" fill="#0284c7"/>
+           <path d="M50 70 L82 52 L50 34 L18 52 Z" fill="#0ea5e9"/>
+           <path d="M50 61 L82 43 L50 25 L18 43 Z" fill="#38bdf8"/>
+           <path d="M50 52 L70 42 L50 32 L30 42 Z" fill="#7dd3fc" filter="url(#flglow2)"/>
+           <circle cx="50" cy="42" r="5" fill="white" opacity=".95"/>
+          </svg>
+         </div>
+         <span class="cer-org-name">Fatlin AI</span>
+         <span class="cer-org-sub">Plataforma</span>
+        </a>
+
+       </div><!-- /cer-orgs -->
+
+       <!-- Fecha + SHA -->
+       <div class="cer-meta">
+        <span class="cer-date" id="dip-date">—</span>
+        <span class="cer-date-sub">Fecha de emisión del certificado</span>
+        <span class="cer-sha" id="dip-sha">SHA · FATLIN-ID</span>
+       </div>
+
+      </div>
+     </div><!-- /sección pie -->
+
+    </div><!-- /cert-col-main -->
+
+    <!-- ══ COLUMNA DERECHA ══ -->
+    <div class="cert-col-side">
+     <div class="cer-side-tier" id="dip-side-tier">💎 DIAMANTE</div>
+     <p class="cer-scan-lbl">Escanea para<br>verificar autenticidad</p>
+     <div class="cer-qr-box" id="dip-qr-container">
+      <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+       <rect width="120" height="120" fill="white"/>
+       <text x="60" y="65" text-anchor="middle" font-size="9" fill="#9ca3af">QR al emitir</text>
+      </svg>
+     </div>
+     <div class="cer-id-box"><strong>ID del Certificado</strong><span id="dip-cert-id">FATLIN-ID</span></div>
+     <div class="cer-stats">
+      <div class="cer-stat"><span class="cer-stat-lbl">Niveles</span>  <span class="cer-stat-val" id="dip-stat-levels">— ✅</span></div>
+      <div class="cer-stat"><span class="cer-stat-lbl">Módulos</span>  <span class="cer-stat-val" id="dip-stat-modules">—</span></div>
+      <div class="cer-stat"><span class="cer-stat-lbl">Preguntas</span><span class="cer-stat-val" id="dip-stat-questions">—</span></div>
+      <div class="cer-stat"><span class="cer-stat-lbl">Precisión</span><span class="cer-stat-val">≥ 80%</span></div>
+     </div>
+     <div class="cer-cycle">
+      <p class="cer-cycle-hdr">Progresión de Ciclos</p>
+      <div class="cer-cycle-rows" id="dip-cycle-rows">
+       <!-- se inyecta por JS -->
+      </div>
+     </div>
+     <div class="cer-valid"><div class="cer-vdot"></div>Certificado válido</div>
+    </div><!-- /cert-col-side -->
+
+   </div><!-- /cert-paper-inner -->
+  </div><!-- /diploma-content -->
+
+  <!-- Botones -->
+  <div class="diploma-actions">
+   <button id="btn-dip-print" class="wbtn primary" style="margin:0" data-i18n="diploma_print">🖨️ Imprimir / Guardar PDF</button>
+   <button id="btn-dip-close" class="wbtn slate" style="margin:0;flex:0 0 auto;padding:.9rem 1.2rem">✕</button>
+  </div>
+
+ </div><!-- /diploma-wrap -->
+</div>
+
+<!-- MODAL TIENDA -->
+<div id="modal-shop">
+    <div class="shop-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+            <h2 style="font-size:1.3rem;font-weight:800;color:#1e293b" data-i18n="shop_title">🛍️ Tienda PACIE</h2>
+            <button id="btn-close-shop" style="background:#f1f5f9;border:none;cursor:pointer;padding:8px;border-radius:12px;display:flex"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div style="background:#fef3c7;border-radius:1rem;padding:.75rem 1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem">
+            <span style="font-size:1.2rem">⭐</span>
+            <span style="font-weight:700;color:#92400e" data-i18n="your_stars">Tus estrellas: </span>
+            <span id="shop-stars" style="font-weight:800;color:#d97706;font-size:1.1rem">0</span>
+        </div>
+        <p style="font-size:.8rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.75rem">Escudos de Racha</p>
+        <div class="shop-item" id="shop-buy-1" onclick="buyShields(1,350)">
+            <div style="display:flex;align-items:center;gap:.75rem">
+                <span style="font-size:1.5rem">🛡️</span>
+                <div style="text-align:left"><p style="font-weight:700;color:#1e293b;font-size:.9rem">1 Escudo</p><p style="font-size:.75rem;color:#64748b">Protege tu racha 1 vez</p></div>
+            </div>
+            <span style="background:#e0f2fe;color:#0284c7;font-weight:700;font-size:.85rem;padding:4px 12px;border-radius:20px">⭐ 350</span>
+        </div>
+        <div class="shop-item" id="shop-buy-3" onclick="buyShields(3,1100)">
+            <div style="display:flex;align-items:center;gap:.75rem">
+                <span style="font-size:1.5rem">🛡️🛡️🛡️</span>
+                <div style="text-align:left"><p style="font-weight:700;color:#1e293b;font-size:.9rem">3 Escudos</p><p style="font-size:.75rem;color:#16a34a">¡Ahorra 50 estrellas!</p></div>
+            </div>
+            <span style="background:#f0fdf4;color:#16a34a;font-weight:700;font-size:.85rem;padding:4px 12px;border-radius:20px">⭐ 1100</span>
+        </div>
+        <p style="font-size:.8rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.1em;margin:.75rem 0">Modo Gala ✨</p>
+        <div class="shop-item gala-item" id="shop-buy-gala" onclick="buyGala(24,500)">
+            <div style="display:flex;align-items:center;gap:.75rem">
+                <span style="font-size:1.5rem">✨</span>
+                <div style="text-align:left"><p style="font-weight:700;color:#1e293b;font-size:.9rem">Modo Gala 24h</p><p style="font-size:.75rem;color:#64748b">Vidas infinitas + fondo estelar</p></div>
+            </div>
+            <span style="background:#fffbeb;color:#d97706;font-weight:700;font-size:.85rem;padding:4px 12px;border-radius:20px">⭐ 500</span>
+        </div>
+        <div class="shop-item gala-item" id="shop-buy-gala2" onclick="buyGala(72,1500)">
+            <div style="display:flex;align-items:center;gap:.75rem">
+                <span style="font-size:1.5rem">👑</span>
+                <div style="text-align:left"><p style="font-weight:700;color:#1e293b;font-size:.9rem">Modo Gala 72h</p><p style="font-size:.75rem;color:#16a34a">¡El mejor valor!</p></div>
+            </div>
+            <span style="background:#fffbeb;color:#d97706;font-weight:700;font-size:.85rem;padding:4px 12px;border-radius:20px">⭐ 1500</span>
+        </div>
+    </div>
+</div>
+
+<footer class="page-footer"><p data-i18n="footer">Tecnotips &#169; - 2026 · Tecnología con propósito</p></footer>
+<div id="error-msg"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PWA — REGISTRO DEL SERVICE WORKER
+═══════════════════════════════════════════════════════════════ -->
+
+<!-- ════════════════════════════════════════════════════════
+     SCRIPTS EXTERNOS
+     Cargados con defer: se ejecutan después del HTML
+     pwa.js      → Service Worker & PWA install
+     splash.js   → Idioma, splash, watchdog auth
+     main.js     → Firebase, lógica, UI (type=module)
+     restSystem.js → Sistema de alertas de descanso
+════════════════════════════════════════════════════════ -->
+
+<!-- PWA — Service Worker (sin defer: necesita registrarse lo antes posible) -->
+<script src="js/pwa.js"></script>
+
+<!-- Splash & idioma (sin defer: debe estar disponible antes del módulo) -->
+<script src="js/splash.js"></script>
+
+<!-- ── MODAL DESCANSO ── -->
+<div id="modal-rest">
+  <div class="rest-card">
+    <div class="rest-emblem-wrap">
+      <div class="rest-ring"></div>
+      <div class="rest-ring2"></div>
+      <span class="rest-zzz">💤</span>
+      <span class="rest-zzz2">💤</span>
+      <span class="rest-zzz3">💤</span>
+      <!-- Emblema descanso — sprite SVG reutilizable -->
+      <svg class="rest-emblem-svg" width="110" height="110" aria-hidden="true">
+        <use href="#rest-emblem"></use>
+      </svg>
+    </div>
+    <div class="rest-title" id="rest-title">¡Hora de descansar!</div>
+    <div class="rest-subtitle" id="rest-subtitle">Llevas activo</div>
+    <div class="rest-time-badge" id="rest-time-badge">3 horas</div>
+    <div class="rest-dots" id="rest-dots"></div>
+    <p class="rest-tip" id="rest-tip">Tu cerebro aprende mejor con pausas cortas. 👀 Aparta la vista de la pantalla unos minutos — ¡vuelve con más energía!</p>
+    <button class="rest-btn" onclick="closeRestModal()">✅ Entendido, tomo un descanso</button>
+    <button class="rest-btn-skip" onclick="closeRestModal(true)" id="rest-skip-btn">Seguir jugando de todas formas</button>
+  </div>
+</div><!-- /#modal-rest -->
+
+<!-- ── MODAL LOGROS ──────────────────────────────── -->
+<div id="modal-logros">
+  <div class="logros-card">
+    <div class="logros-header">
+      <span class="logros-title">🏅 Mis Logros</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button onclick="document.getElementById('modal-logros').classList.remove('active');openAvatarPicker()" style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:4px 8px;font-size:.75rem;color:#0369a1;cursor:pointer">🧑 Avatar</button>
+        <button onclick="document.getElementById('modal-logros').classList.remove('active')" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:#64748b">✕</button>
+      </div>
+    </div>
+    <div class="logros-user">
+      <div class="logros-avatar" id="logros-avatar">🧑</div>
+      <div class="logros-info">
+        <div class="logros-name" id="logros-name">Usuario</div>
+        <div class="logros-level" id="logros-level">Nivel 1 · 0 ⭐</div>
+      </div>
+    </div>
+    <div class="logros-section">
+      <div class="logros-section-title">🎖️ Insignias</div>
+      <div class="logros-grid" id="logros-badges-grid"></div>
+    </div>
+    <div class="logros-section">
+      <div class="logros-section-title">📜 Diplomas</div>
+      <div id="logros-diplomas-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Módulo principal (Firebase, juego, UI) -->
+<script type="module" src="js/main.js"></script>
+
+<!-- Sistema de alertas de descanso (IIFE independiente) -->
+<script src="js/restSystem.js" defer></script>
+
+
+<!-- ── OVERLAY MOMENTO DE CRUCE ─────────────────────────────── -->
+<div id="cruce-overlay">
+  <div class="cruce-line-flash"></div>
+  <div class="cruce-msg">
+    <span class="cruce-icon">🚀</span>
+    <div class="cruce-title" id="cruce-title">¡Cruzaste la Zona de Ascenso!</div>
+    <div class="cruce-sub" id="cruce-sub">Mantén tu posición esta semana<br>para recibir tu diploma el lunes.</div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── 1. DIPLOMAS PÚBLICOS ─────────────────────────────────────────────
+    // Cualquiera puede leer (para verificar escaneando el QR)
+    // Solo el propio usuario autenticado puede escribir su diploma
+    match /fatlin_diplomas_fatlin-ai-v1/{certId} {
+      allow read:  if true;
+      allow create: if request.auth != null
+                   && request.resource.data.userUid == request.auth.uid;
+      allow update: if false;   // inmutable una vez emitido
+      allow delete: if false;
+    }
+
+    // ── 2. PROGRESO PRIVADO DEL USUARIO ─────────────────────────────────
+    // Solo el propio usuario accede a su carpeta
+    match /artifacts/fatlin-ai-v1/users/{uid}/{document=**} {
+      allow read, write: if request.auth != null
+                         && request.auth.uid == uid;
+    }
+
+    // ── 3. RANKING GLOBAL ────────────────────────────────────────────────
+    // Lectura pública (para mostrar el ranking a todos)
+    // Escritura solo del propio usuario
+    match /fatlin_ranking_fatlin-ai-v1/{uid} {
+      allow read:  if true;
+      allow write: if request.auth != null
+                   && request.auth.uid == uid;
+    }
+
+    // ── 4. RANKING SEMANAL ───────────────────────────────────────────────
+    // Lectura pública, escritura autenticada
+    match /fatlin_weekly_fatlin-ai-v1/{docId} {
+      allow read:  if true;
+      allow write: if request.auth != null;
+    }
+  }
+}

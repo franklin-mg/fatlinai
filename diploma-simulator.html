@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador de Diplomas — Fatlin Tecnopedagogico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+
+:root {
+  --bg:        #060c18;
+  --surface:   #0d1a2e;
+  --glass:     rgba(255,255,255,.04);
+  --border:    rgba(255,255,255,.08);
+  --accent:    #38bdf8;
+  --text:      #e2e8f0;
+  --muted:     #64748b;
+  --gold:      #f59e0b;
+  --font-disp: 'Playfair Display', Georgia, serif;
+  --font-body: 'Source Serif 4', Georgia, serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+html { scroll-behavior:smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ═══════════════════ FONDO ESTELAR ═══════════════════ */
+body::before {
+  content:'';
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(56,189,248,.07) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 30% at 90% 80%,  rgba(168,85,247,.05) 0%, transparent 60%),
+    radial-gradient(ellipse 30% 40% at 10% 60%,  rgba(245,158,11,.04) 0%, transparent 55%);
+}
+
+.stars {
+  position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+}
+.star {
+  position:absolute; border-radius:50%; background:white;
+  animation: twinkle var(--d,3s) var(--dl,0s) ease-in-out infinite;
+}
+@keyframes twinkle {
+  0%,100%{ opacity:var(--min,.1); transform:scale(1); }
+  50%    { opacity:var(--max,.6); transform:scale(1.4); }
+}
+
+/* ═══════════════════ LAYOUT ═══════════════════ */
+.page-wrap {
+  position: relative; z-index:1;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 20px 60px;
+}
+
+/* ═══════════════════ HEADER ═══════════════════ */
+.site-header {
+  text-align:center;
+  margin-bottom: 44px;
+}
+.header-eyebrow {
+  font-family: var(--font-mono);
+  font-size: .65rem;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 10px;
+  opacity: .8;
+}
+.header-title {
+  font-family: var(--font-disp);
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+  font-weight: 900;
+  letter-spacing: .04em;
+  background: linear-gradient(135deg, #e2e8f0 30%, #38bdf8 70%, #818cf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.15;
+}
+.header-sub {
+  font-size: 1rem;
+  color: var(--muted);
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* ═══════════════════ TIER SELECTOR ═══════════════════ */
+.tier-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 36px;
+  padding: 18px 20px;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  backdrop-filter: blur(12px);
+}
+
+.tier-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 50px;
+  border: 1.5px solid var(--border);
+  background: rgba(255,255,255,.03);
+  color: rgba(255,255,255,.55);
+  font-family: var(--font-mono);
+  font-size: .58rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all .22s cubic-bezier(.34,1.56,.64,1);
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+.tier-pill::before {
+  content:'';
+  position:absolute; inset:0; border-radius:50px;
+  background: linear-gradient(135deg, var(--tc,#38bdf8), transparent);
+  opacity:0; transition: opacity .22s;
+}
+.tier-pill:hover { transform:translateY(-2px); color:white; border-color: rgba(255,255,255,.2); }
+.tier-pill:hover::before { opacity:.12; }
+.tier-pill.active {
+  color: white;
+  border-color: var(--tc, #38bdf8);
+  box-shadow: 0 0 20px rgba(56,189,248,.25), inset 0 0 12px rgba(56,189,248,.08);
+  transform: translateY(-2px);
+}
+.tier-pill.active::before { opacity:.15; }
+.tier-pill .pip {
+  width:8px; height:8px; border-radius:50%;
+  background: var(--tc, #38bdf8);
+  box-shadow: 0 0 6px var(--tc, #38bdf8);
+  flex-shrink:0;
+}
+
+/* ═══════════════════ DIPLOMA SHELL ═══════════════════ */
+.diploma-shell {
+  position: relative;
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+/* Marco exterior */
+#diploma-frame {
+  width:100%;
+  aspect-ratio: 4/3;
+  background: linear-gradient(145deg,#1a3a6a 0%,#060c18 40%,#0e2848 100%);
+  border-radius: 20px;
+  padding: 7px;
+  box-shadow:
+    0 0 0 1px rgba(80,160,255,.18),
+    0 2px 4px rgba(0,0,0,.4),
+    0 40px 120px rgba(0,0,0,.9),
+    0 0 80px rgba(0,120,255,.04);
+  position: relative;
+  transition: box-shadow .4s ease;
+}
+#diploma-frame::before {
+  content:'';
+  position:absolute; inset:0; border-radius:20px;
+  background:
+    radial-gradient(ellipse at 3% 3%,   rgba(80,180,255,.16), transparent 38%),
+    radial-gradient(ellipse at 97% 97%, rgba(180,140,20,.07),  transparent 38%);
+  pointer-events:none; z-index:0;
+}
+
+/* Papel interno */
+.cert-paper {
+  width:100%; height:100%;
+  background: #f4f7ff;
+  border-radius: 14px;
+  border: 1.5px solid #b0c8e8;
+  display: grid;
+  grid-template-columns: 1fr 21.5%;
+  overflow: hidden;
+  position: relative;
+  transition: background .4s, border-color .4s;
+}
+.cert-paper::before {
+  content:'';
+  position:absolute; inset:0;
+  background-image: repeating-linear-gradient(0deg,transparent,transparent 30px,rgba(0,40,100,.012) 30px,rgba(0,40,100,.012) 31px);
+  pointer-events:none; z-index:0;
+}
+.cert-paper::after {
+  content:'PACIE';
+  position:absolute; top:50%; left:36%;
+  transform:translate(-50%,-50%) rotate(-10deg);
+  font-family:'Cinzel',serif; font-size:9rem; font-weight:900;
+  color:rgba(0,80,180,.022); pointer-events:none;
+  letter-spacing:.12em; z-index:0; white-space:nowrap;
+}
+
+/* ═══ COLUMNA PRINCIPAL ═══ */
+.cert-main {
+  padding: 2% 2.5% 1.8% 2.8%;
+  display: flex; flex-direction:column; justify-content:space-between;
+  border-right: 1px solid #d0dff0;
+  position: relative; z-index:1; height:100%;
+}
+.cert-main::before {
+  content:'';
+  position:absolute; left:0; top:16px; bottom:16px; width:4px;
+  background:linear-gradient(180deg,transparent,#2d7dd2 20%,#00c8ff 50%,#2d7dd2 80%,transparent);
+  border-radius:2px;
+}
+
+/* Cabecera */
+.c-head { display:flex; align-items:flex-start; gap:1.2%; }
+.c-head-txt { flex:1; }
+.c-issuer {
+  font-family: var(--font-mono);
+  font-size:.58rem; font-weight:700; letter-spacing:.16em;
+  text-transform:uppercase; color:#4a6080; margin-bottom:2px;
+}
+.c-title {
+  font-family: var(--font-disp);
+  font-size:1.55rem; font-weight:900; color:#060f1e; line-height:1.1;
+}
+.c-subtitle {
+  font-family: var(--font-mono);
+  font-size:.6rem; letter-spacing:.13em;
+  text-transform:uppercase; color:#4a6080; margin-top:3px;
+}
+.c-chip {
+  display:inline-flex; align-items:center; gap:4px;
+  margin-top:5px; padding:2px 10px;
+  background:linear-gradient(135deg,rgba(0,180,255,.1),rgba(0,80,200,.06));
+  border:1px solid rgba(0,130,255,.28); border-radius:20px;
+  font-family: var(--font-mono);
+  font-size:.6rem; font-weight:700; letter-spacing:.07em;
+  text-transform:uppercase; color:#0055a0;
+  transition: all .4s;
+}
+.c-rule {
+  height:1px; margin:8px 0 0;
+  background:linear-gradient(90deg,transparent,#b0c8e8,transparent);
+}
+
+/* Medio */
+.c-mid { flex:1; display:flex; flex-direction:column; justify-content:space-between; padding:2.5% 0 1.5%; }
+
+.c-namebox {
+  text-align:center; padding:1% 4% 1.2%;
+  background:linear-gradient(135deg,rgba(0,80,180,.04),rgba(0,120,255,.02));
+  border-radius:10px; border:1px solid rgba(0,100,200,.1);
+}
+.c-certify-lbl {
+  font-family: var(--font-body);
+  font-size:.82rem; color:#4a6080; margin-bottom:5px; font-style:italic;
+}
+.c-grad-name {
+  font-family: var(--font-disp);
+  font-size:2.1rem; font-weight:900; color:#060f1e; line-height:1.1; display:block;
+  letter-spacing:.01em;
+}
+.c-name-role {
+  font-family: var(--font-mono);
+  font-size:.72rem; color:#4a6080; margin-top:5px;
+  letter-spacing:.08em; text-transform:uppercase; font-weight:600;
+}
+
+.c-achieve {
+  font-family: var(--font-body);
+  font-size:.88rem; color:#253040; line-height:1.65; text-align:justify; padding:2px 0;
+}
+.c-achieve strong { color:#003a80; font-weight:700; }
+
+/* Temas */
+.c-topics-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:5px; }
+.c-topics-lbl {
+  font-family: var(--font-mono);
+  font-size:.66rem; font-weight:700; letter-spacing:.13em;
+  text-transform:uppercase; color:#4a6080;
+  display:flex; align-items:center; gap:5px;
+}
+.c-topics-lbl::before { content:''; display:inline-block; width:3px; height:9px; background:linear-gradient(180deg,#00c8ff,#0055a0); border-radius:2px; }
+.c-topics-badge {
+  font-family: var(--font-mono);
+  font-size:.66rem; font-weight:700; background:#dbeafe; color:#1e40af;
+  border:1px solid #bfdbfe; border-radius:20px; padding:2px 9px;
+}
+.c-topics-grid { display:grid; grid-template-columns:1fr 1fr; gap:1px 10px; }
+.c-topic-row {
+  display:flex; align-items:center; gap:4px;
+  padding:3px 0; border-bottom:1px solid rgba(0,60,120,.07);
+}
+.c-topic-row:nth-last-child(-n+2){ border-bottom:none; }
+.c-topic-chk {
+  width:15px; height:15px; flex-shrink:0;
+  background:#dcfce7; border:1px solid #86efac; border-radius:3px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:9px; color:#16a34a; font-weight:900;
+}
+.c-topic-num { font-family:'JetBrains Mono',monospace; font-size:.65rem; font-weight:700; color:#90aac8; flex-shrink:0; width:20px; }
+.c-topic-name { font-family:var(--font-body); font-size:.84rem; font-weight:600; color:#0d1e36; line-height:1.35; flex:1; }
+
+/* Pie */
+.c-foot {
+  padding-top:8px; border-top:1px solid #d0dff0;
+  display:flex; align-items:flex-end; justify-content:space-between; gap:8px;
+}
+.c-orgs { display:flex; align-items:flex-end; justify-content:space-between; width:100%; }
+.c-org  { display:flex; flex-direction:column; align-items:center; gap:3px; text-align:center; }
+a.c-org {
+  text-decoration:none; cursor:pointer; border-radius:10px; padding:4px;
+  transition: background .18s, transform .18s;
+}
+a.c-org:hover { background:rgba(2,132,199,.08); transform:translateY(-2px); }
+a.c-org:hover .c-org-img { border-color:#0284c7; box-shadow:0 4px 14px rgba(2,132,199,.25); }
+a.c-org:hover .c-org-name { color:#0284c7; }
+.c-org-img {
+  width:46px; height:46px; background:white;
+  border:1.5px solid #b0c8e8; border-radius:8px; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 2px 8px rgba(0,40,100,.1);
+  transition: border-color .2s, box-shadow .2s;
+}
+.c-org-img img { width:100%; height:100%; object-fit:contain; padding:3px; }
+.c-org-name {
+  font-family:var(--font-mono); font-size:.7rem; font-weight:800;
+  color:#0d1e36; letter-spacing:.04em; text-transform:uppercase;
+  transition: color .2s;
+}
+.c-org-sub  { font-family:var(--font-mono); font-size:.62rem; color:#4a6080; letter-spacing:.06em; text-transform:uppercase; }
+.c-org-div  { width:1px; height:28px; align-self:center; background:linear-gradient(180deg,transparent,#b0c8e8,transparent); }
+
+.c-meta { display:flex; flex-direction:column; align-items:flex-end; gap:3px; flex-shrink:0; }
+.c-date     { font-family:var(--font-mono); font-size:.72rem; font-weight:700; color:#0d1e36; }
+.c-date-sub { font-family:var(--font-mono); font-size:.56rem; color:#4a6080; }
+.c-sha {
+  font-family:'JetBrains Mono',monospace; font-size:.6rem; font-weight:700;
+  color:#003880; background:#dbeafe; border:1px solid #bfdbfe;
+  border-radius:4px; padding:3px 8px; letter-spacing:.04em; margin-top:3px;
+}
+
+/* ═══ COLUMNA DERECHA ═══ */
+.cert-side {
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:center; padding:1.6% 1.3%; gap:1%;
+  background:linear-gradient(180deg,rgba(0,80,180,.05) 0%,rgba(0,120,255,.02) 100%);
+  position:relative; z-index:1;
+}
+
+.c-side-tier {
+  font-family:var(--font-mono); font-size:.58rem; font-weight:800;
+  letter-spacing:.11em; text-transform:uppercase;
+  padding:4px 14px; border-radius:20px;
+  background:linear-gradient(135deg,#003880,#001840);
+  color:#67b8f0; box-shadow:0 3px 12px rgba(0,50,140,.4);
+  text-align:center;
+}
+.c-scan-lbl {
+  font-family:var(--font-mono); font-size:.58rem; font-weight:600;
+  letter-spacing:.09em; text-transform:uppercase;
+  color:#9ca3af; text-align:center; line-height:1.6;
+}
+.c-qr-box {
+  background:white; border:2px solid #b0c8e8; border-radius:9px; padding:5px;
+  width:25%; aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; box-shadow:0 4px 16px rgba(0,50,120,.1);
+}
+.c-id-box {
+  font-family:'JetBrains Mono',monospace; font-size:.56rem; color:#4a6080;
+  text-align:center; word-break:break-all;
+  background:rgba(0,50,100,.03); border:1px solid rgba(0,70,150,.1);
+  border-radius:6px; padding:5px 7px; line-height:1.65; width:100%;
+}
+.c-id-box strong { display:block; font-family:'JetBrains Mono',monospace; font-size:.5rem; color:#9ca3af; font-weight:700; letter-spacing:.1em; text-transform:uppercase; margin-bottom:2px; }
+
+.c-stats { width:100%; display:flex; flex-direction:column; gap:3px; }
+.c-stat {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:3px 7px; background:white; border:1px solid #d8e8f8; border-radius:6px;
+}
+.c-stat-lbl { font-family:var(--font-mono); font-size:.58rem; font-weight:600; color:#9ca3af; text-transform:uppercase; letter-spacing:.07em; }
+.c-stat-val { font-family:'JetBrains Mono',monospace; font-size:.72rem; font-weight:800; color:#080f20; }
+
+.c-cycle { width:100%; background:rgba(0,60,140,.03); border:1px solid rgba(0,80,180,.1); border-radius:8px; padding:5px 8px; }
+.c-cycle-hdr { font-family:var(--font-mono); font-size:.54rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:#4a6080; margin-bottom:5px; text-align:center; }
+.c-cycle-rows { display:flex; flex-direction:column; gap:3px; }
+.c-cycle-row  { display:flex; align-items:center; gap:4px; }
+.c-cycle-lbl  { font-family:'JetBrains Mono',monospace; font-size:.54rem; font-weight:700; color:#9ca3af; width:30px; flex-shrink:0; }
+.c-cycle-track { flex:1; height:5px; background:#e4edf8; border-radius:3px; overflow:hidden; }
+.c-cycle-fill  { height:100%; border-radius:3px; }
+.c-cycle-pct   { font-family:'JetBrains Mono',monospace; font-size:.54rem; font-weight:700; color:#374151; width:28px; text-align:right; }
+
+.c-valid {
+  display:flex; align-items:center; gap:5px; padding:4px 11px; border-radius:20px;
+  background:#f0fdf4; border:1px solid #86efac;
+  font-family:var(--font-mono); font-size:.62rem; font-weight:700; color:#15803d;
+}
+.c-vdot {
+  width:6px; height:6px; border-radius:50%; background:#16a34a; flex-shrink:0;
+  animation: cpulse 2s ease-in-out infinite;
+}
+@keyframes cpulse{ 0%,100%{box-shadow:0 0 0 0 rgba(22,163,74,.5)} 50%{box-shadow:0 0 0 5px rgba(22,163,74,0)} }
+
+/* ═══════════════════ ACTIONS ═══════════════════ */
+.actions-bar {
+  display:flex; gap:12px; max-width:1040px; margin:18px auto 0;
+}
+.btn-action {
+  flex:1; display:flex; align-items:center; justify-content:center; gap:8px;
+  padding:.85rem 1.4rem; border-radius:14px; border:none;
+  font-family: var(--font-mono); font-weight:700; font-size:.72rem;
+  letter-spacing:.05em; text-transform:uppercase;
+  cursor:pointer; transition:all .22s;
+}
+.btn-primary {
+  background:linear-gradient(135deg,#0284c7,#0369a1);
+  color:white; box-shadow:0 6px 20px rgba(2,132,199,.35);
+}
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(2,132,199,.5); }
+.btn-ghost {
+  background:rgba(255,255,255,.05); color:var(--muted);
+  border:1px solid var(--border);
+}
+.btn-ghost:hover { background:rgba(255,255,255,.09); color:var(--text); }
+
+/* ═══════════════════ ANIMACIONES ═══════════════════ */
+@keyframes fadeSlideIn {
+  from { opacity:0; transform:translateY(12px) scale(.98); }
+  to   { opacity:1; transform:none; }
+}
+.diploma-enter { animation: fadeSlideIn .4s cubic-bezier(.16,1,.3,1) forwards; }
+
+/* ═══════════════════ PRINT ═══════════════════ */
+@media print {
+  body { background:white !important; }
+  body::before, .stars { display:none; }
+  .page-wrap { padding:0 !important; }
+  .site-header, .tier-nav, .actions-bar { display:none !important; }
+  #diploma-frame {
+    box-shadow:none !important;
+    background: linear-gradient(145deg,#1a3a6a 0%,#0a1628 40%,#0e2848 100%) !important;
+  }
+}
+@media print { @page { size:A4 landscape; margin:8mm; } }
+</style>
+</head>
+<body>
+
+<!-- Fondo estelar -->
+<div class="stars" id="stars-bg"></div>
+
+<div class="page-wrap">
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <p class="header-eyebrow">Fatlin AI · Metodología PACIE · FATLA · ASOMTV</p>
+    <h1 class="header-title">Simulador de Diplomas</h1>
+    <p class="header-sub">11 niveles de certificación gamificada · Selecciona un tier para previsualizar</p>
+  </header>
+
+  <!-- SELECTOR DE TIER -->
+  <nav class="tier-nav" id="tier-nav"></nav>
+
+  <!-- DIPLOMA -->
+  <div class="diploma-shell">
+    <div id="diploma-frame">
+      <div class="cert-paper" id="cert-paper">
+
+        <!-- COLUMNA PRINCIPAL -->
+        <div class="cert-main">
+          <!-- Cabecera -->
+          <div>
+            <div class="c-head">
+              <div id="d-seal" style="flex-shrink:0;"></div>
+              <div class="c-head-txt">
+                <p class="c-issuer">Certificado oficial · Metodología PACIE · Educación Virtual Gamificada con IA</p>
+                <h1 class="c-title" id="d-title">Certificado de Logro PACIE</h1>
+                <p class="c-subtitle" id="d-subtitle">Acreditación Micro-curricular · Fatlin AI</p>
+                <div class="c-chip" id="d-chip">💎 Diamante · 250 Niveles</div>
+              </div>
+            </div>
+            <div class="c-rule"></div>
+          </div>
+
+          <!-- Medio -->
+          <div class="c-mid">
+            <div class="c-namebox">
+              <p class="c-certify-lbl">Este certificado acredita que ha completado satisfactoriamente</p>
+              <span class="c-grad-name" id="d-name">Franklin Morillo González</span>
+              <p class="c-name-role" id="d-role">Nivel PACIE · Fatlin AI</p>
+            </div>
+            <p class="c-achieve" id="d-achieve"></p>
+            <div>
+              <div class="c-topics-hdr">
+                <span class="c-topics-lbl">Contenidos Académicos Acreditados</span>
+                <span class="c-topics-badge" id="d-badge">Módulos ✅</span>
+              </div>
+              <div class="c-topics-grid" id="d-topics"></div>
+            </div>
+          </div>
+
+          <!-- Pie -->
+          <div>
+            <div class="c-foot">
+              <div class="c-orgs">
+                <a class="c-org" href="https://www.fatla.org" target="_blank" rel="noopener" title="Visitar FATLA · fatla.org">
+                  <div class="c-org-img">
+                    <img src="https://www.fatla.net/mega/imacorp/2025/logos/planeta-fatla.png"
+                         onerror="if(this._e)return;this._e=1;this.parentElement.innerHTML='<svg viewBox=\'0 0 100 100\' style=\'width:80%;padding:4px\'><path d=\'M50 88 L82 70 L50 52 L18 70 Z\' fill=\'#0369a1\'/><path d=\'M50 79 L82 61 L50 43 L18 61 Z\' fill=\'#0284c7\'/><path d=\'M50 70 L82 52 L50 34 L18 52 Z\' fill=\'#0ea5e9\'/></svg>'" alt="FATLA">
+                  </div>
+                  <span class="c-org-name">FATLA</span>
+                  <span class="c-org-sub">Fundación</span>
+                </a>
+                <div class="c-org-div"></div>
+                <a class="c-org" href="https://www.pacie.education/portal/" target="_blank" rel="noopener" title="Visitar PACIE · pacie.education">
+                  <div class="c-org-img">
+                    <img src="https://www.pacie.education/mega/pacie/logos/pacie-logo-oficial.png"
+                         onerror="if(this._e)return;this._e=1;this.parentElement.innerHTML='<span style=\'font-size:1.5rem\'>🎓</span>'" alt="PACIE">
+                  </div>
+                  <span class="c-org-name">PACIE</span>
+                  <span class="c-org-sub">Metodología</span>
+                </a>
+                <div class="c-org-div"></div>
+                <a class="c-org" href="https://www.asomtv.org" target="_blank" rel="noopener" title="Visitar ASOMTV · asomtv.org">
+                  <div class="c-org-img">
+                    <img src="https://asomtv.org/mega/imacorp/2023/images/logo-asomtv.png"
+                         onerror="if(this._e)return;this._e=1;this.parentElement.innerHTML='<span style=\'font-size:1.5rem\'>🌐</span>'" alt="ASOMTV">
+                  </div>
+                  <span class="c-org-name">ASOMTV</span>
+                  <span class="c-org-sub">Asociación</span>
+                </a>
+                <div class="c-org-div"></div>
+                <a class="c-org" href="https://fatlin.web.app" target="_blank" rel="noopener" title="Fatlin AI · fatlin.web.app">
+                  <div class="c-org-img" style="background:white;">
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;padding:4px">
+                      <defs><filter id="fg2"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+                      <path d="M50 88 L82 70 L50 52 L18 70 Z" fill="#0369a1"/>
+                      <path d="M50 79 L82 61 L50 43 L18 61 Z" fill="#0284c7"/>
+                      <path d="M50 70 L82 52 L50 34 L18 52 Z" fill="#0ea5e9"/>
+                      <path d="M50 61 L82 43 L50 25 L18 43 Z" fill="#38bdf8"/>
+                      <path d="M50 52 L70 42 L50 32 L30 42 Z" fill="#7dd3fc" filter="url(#fg2)"/>
+                      <circle cx="50" cy="42" r="5" fill="white" opacity=".95"/>
+                    </svg>
+                  </div>
+                  <span class="c-org-name">Fatlin AI</span>
+                  <span class="c-org-sub">Plataforma</span>
+                </a>
+              </div>
+              <div class="c-meta">
+                <span class="c-date" id="d-date">—</span>
+                <span class="c-date-sub">Fecha de emisión del certificado</span>
+                <span class="c-sha" id="d-sha">SHA · FATLIN-ID</span>
+              </div>
+            </div>
+          </div>
+        </div><!-- /cert-main -->
+
+        <!-- COLUMNA DERECHA -->
+        <div class="cert-side">
+          <div class="c-side-tier" id="d-side-tier">💎 DIAMANTE</div>
+          <p class="c-scan-lbl">Escanea para<br>verificar autenticidad</p>
+          <div class="c-qr-box" id="d-qr">
+            <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+              <rect width="100" height="100" fill="white"/>
+              <text x="50" y="55" text-anchor="middle" font-size="8" fill="#ccc">QR</text>
+            </svg>
+          </div>
+          <div class="c-id-box"><strong>ID del Certificado</strong><span id="d-certid">FATLIN-ID</span></div>
+          <div class="c-stats">
+            <div class="c-stat"><span class="c-stat-lbl">Niveles</span>  <span class="c-stat-val" id="d-stat-lvl">—</span></div>
+            <div class="c-stat"><span class="c-stat-lbl">Módulos</span>  <span class="c-stat-val" id="d-stat-mod">—</span></div>
+            <div class="c-stat"><span class="c-stat-lbl">Preguntas</span><span class="c-stat-val" id="d-stat-q">—</span></div>
+            <div class="c-stat"><span class="c-stat-lbl">Precisión</span><span class="c-stat-val">≥ 80%</span></div>
+          </div>
+          <div class="c-cycle">
+            <p class="c-cycle-hdr">Progresión de Ciclos</p>
+            <div class="c-cycle-rows" id="d-cycles"></div>
+          </div>
+          <div class="c-valid"><div class="c-vdot"></div>Certificado válido</div>
+        </div>
+
+      </div><!-- /cert-paper -->
+    </div><!-- /diploma-frame -->
+
+    <div class="actions-bar">
+      <button class="btn-action btn-primary" onclick="window.print()">🖨️ &nbsp;Imprimir / Guardar PDF</button>
+      <button class="btn-action btn-ghost"   onclick="goNext()">→ &nbsp;Siguiente Tier</button>
+    </div>
+  </div><!-- /diploma-shell -->
+
+</div><!-- /page-wrap -->
+
+<script>
+/* ════════════════════════════════════════════════
+   DATOS DE LOS 11 TIERS
+════════════════════════════════════════════════ */
+const TIERS = [
+  { min:50,  emoji:'🥉', label:'Bronce',       color:'#cd7f32', glow:'rgba(205,127,50,.65)',  layers:['#5a2a08','#7a3a10','#a05020','#cd7f32'], top:'#e8a060', core:'#ffd4a0', paperBg:'#fffdf5', paperBorder:'rgba(205,127,50,.35)', pillColor:'#cd7f32' },
+  { min:100, emoji:'🥈', label:'Plata',         color:'#c0c0c0', glow:'rgba(192,192,192,.6)',  layers:['#484848','#686868','#909090','#c8c8c8'], top:'#eaeaea', core:'white',   paperBg:'#f8fafc', paperBorder:'rgba(192,192,192,.35)', pillColor:'#94a3b8' },
+  { min:150, emoji:'🥇', label:'Oro',           color:'#ffd700', glow:'rgba(255,215,0,.7)',    layers:['#6a4e00','#907000','#c09000','#ffd700'], top:'#fff066', core:'white',   paperBg:'#fffdf0', paperBorder:'rgba(255,215,0,.4)',   pillColor:'#f59e0b' },
+  { min:200, emoji:'✦',  label:'Platino',       color:'#d4e8ff', glow:'rgba(180,210,240,.6)',  layers:['#3a5060','#5a7080','#8098a8','#b8d0e8'], top:'#eef6ff', core:'white',   paperBg:'#f0f8ff', paperBorder:'rgba(176,196,222,.5)',  pillColor:'#7ec8e3' },
+  { min:250, emoji:'💎', label:'Diamante',      color:'#00cfff', glow:'rgba(0,191,255,.75)',   layers:['#003360','#005590','#007ab5','#00afdf'], top:'#d0f4ff', core:'white',   paperBg:'#ecfeff', paperBorder:'rgba(0,191,255,.4)',    pillColor:'#22d3ee' },
+  { min:300, emoji:'🔴', label:'Gema Roja',     color:'#ff5555', glow:'rgba(255,60,60,.72)',   layers:['#500000','#800000','#b00000','#ff3333'], top:'#ff9090', core:'#ffdddd', paperBg:'#fff5f5', paperBorder:'rgba(255,68,68,.4)',    pillColor:'#f87171' },
+  { min:350, emoji:'💚', label:'Gema Verde',    color:'#00ff99', glow:'rgba(0,255,136,.65)',   layers:['#003318','#005528','#008040','#00cc66'], top:'#80ffbb', core:'#ccffe8', paperBg:'#f0fdf6', paperBorder:'rgba(0,204,102,.4)',    pillColor:'#4ade80' },
+  { min:400, emoji:'💜', label:'Púrpura',       color:'#cc66ff', glow:'rgba(191,95,255,.72)',  layers:['#250048','#420070','#6600aa','#bf5fff'], top:'#e8aaff', core:'#f5d0ff', paperBg:'#faf5ff', paperBorder:'rgba(191,95,255,.4)',   pillColor:'#c084fc' },
+  { min:450, emoji:'⚙️', label:'Titanio',       color:'#a0b8cc', glow:'rgba(144,168,188,.55)', layers:['#1e2e38','#2e4050','#486070','#7898a8'], top:'#d0dce4', core:'white',   paperBg:'#f1f5f9', paperBorder:'rgba(148,163,184,.4)',  pillColor:'#94a3b8' },
+  { min:500, emoji:'🔷', label:'Zafiro',        color:'#4db8ff', glow:'rgba(30,144,255,.78)',  layers:['#001568','#0030a0','#0050c8','#1e80ef'], top:'#b8e0ff', core:'white',   paperBg:'#eff6ff', paperBorder:'rgba(30,144,255,.4)',   pillColor:'#60a5fa' },
+  { min:550, emoji:'☢️', label:'Uranio',        color:'#aaffcc', glow:'rgba(0,255,102,.65)',   layers:['#003318','#004d22','#006630','#00aa55'], top:'#ccffdd', core:'white',   paperBg:'#f0fff6', paperBorder:'rgba(0,255,102,.45)',   pillColor:'#34d399' },
+];
+
+const TIER_DATA = {
+  50:  { certTitle:'Certificado Fundamentos PACIE',       chip:'🥉 Bronce · 50 Niveles · 10 Módulos · 2 Ciclos',         sideTier:'🥉 BRONCE · FUNDAMENTOS PACIE',        cycles:2,  modules:10,  questions:'≥ 250',  cyclePcts:[100,100]                               },
+  100: { certTitle:'Certificado Practicante PACIE',       chip:'🥈 Plata · 100 Niveles · 20 Módulos · 4 Ciclos',         sideTier:'🥈 PLATA · PRACTICANTE PACIE',         cycles:4,  modules:20,  questions:'≥ 500',  cyclePcts:[100,100,100,100]                       },
+  150: { certTitle:'Certificado Experto PACIE',           chip:'🥇 Oro · 150 Niveles · 30 Módulos · 6 Ciclos',           sideTier:'🥇 ORO · EXPERTO PACIE',               cycles:6,  modules:30,  questions:'≥ 750',  cyclePcts:[100,100,100,100,100,100]               },
+  200: { certTitle:'Certificado Máster PACIE',            chip:'✦ Platino · 200 Niveles · 40 Módulos · 8 Ciclos',        sideTier:'✦ PLATINO · MÁSTER PACIE',             cycles:8,  modules:40,  questions:'≥ 1000', cyclePcts:[100,100,100,100,100,100,100,100]       },
+  250: { certTitle:'Certificado Mentor PACIE',            chip:'💎 Diamante · 250 Niveles · 50 Módulos · 10 Ciclos',     sideTier:'💎 DIAMANTE · MENTOR PACIE',           cycles:10, modules:50,  questions:'≥ 1250', cyclePcts:[100,100,100,100,100,100,100,100,100,100] },
+  300: { certTitle:'Certificado Gran Maestro PACIE',      chip:'🔴 Gema Roja · 300 Niveles · 60 Módulos · 12 Ciclos',   sideTier:'🔴 GRAN MAESTRO PACIE',                cycles:12, modules:60,  questions:'≥ 1500', cyclePcts:[100,100,100,100,100,100,100,100,100,100,100,100] },
+  350: { certTitle:'Certificado Eminencia PACIE',         chip:'💚 Gema Verde · 350 Niveles · 70 Módulos · 14 Ciclos',  sideTier:'💚 GEMA VERDE · EMINENCIA PACIE',      cycles:14, modules:70,  questions:'≥ 1750', cyclePcts:[100,100,100,100,100,100,100,100,100,100,100,100,100,100] },
+  400: { certTitle:'Certificado Sabio PACIE',             chip:'💜 Púrpura · 400 Niveles · 80 Módulos · 16 Ciclos',     sideTier:'💜 PÚRPURA · SABIO PACIE',             cycles:16, modules:80,  questions:'≥ 2000', cyclePcts:[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100] },
+  450: { certTitle:'Certificado Titán PACIE',             chip:'⚙️ Titanio · 450 Niveles · 90 Módulos · 18 Ciclos',     sideTier:'⚙️ TITANIO · TITÁN PACIE',            cycles:18, modules:90,  questions:'≥ 2250', cyclePcts:[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100] },
+  500: { certTitle:'Certificado Leyenda Zafiro PACIE',    chip:'🔷 Zafiro · 500 Niveles · 100 Módulos · 20 Ciclos',     sideTier:'🔷 ZAFIRO · LEYENDA PACIE',            cycles:20, modules:100, questions:'≥ 2500', cyclePcts:[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100] },
+  550: { certTitle:'Certificado Leyenda Absoluta PACIE',  chip:'☢️ Uranio · 550 Niveles · 110 Módulos · 22 Ciclos',     sideTier:'☢️ URANIO · LEYENDA ABSOLUTA PACIE',  cycles:22, modules:110, questions:'≥ 2750', cyclePcts:[100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100] },
+};
+
+// 22 temas únicos — 2 por cada nivel de certificación (1 tema / ciclo)
+// Los temas se acumulan progresivamente según el tier
+const TOPICS = [
+  // Ciclos I–II (Bronce · 50 niveles)
+  'Fundamentos y filosofía de la Metodología PACIE',
+  'Origen PACIE: Pedro Camacho, FATLA y contexto latinoamericano',
+  // Ciclos III–IV (Plata · 100 niveles)
+  'Fase Presencia: imagen institucional, motivación y entornos virtuales',
+  'Fase Alcance: objetivos de aprendizaje, estándares y competencias',
+  // Ciclos V–VI (Oro · 150 niveles)
+  'Fase Capacitación: formación docente y competencias tecnológicas',
+  'Fase Interacción: aprendizaje colaborativo, foros y comunidades LMS',
+  // Ciclos VII–VIII (Platino · 200 niveles)
+  'Fase E-learning: plataformas LMS, madurez pedagógica y sostenibilidad',
+  'Educación virtual vs. presencial: paradigmas y modelos comparados',
+  // Ciclos IX–X (Diamante · 250 niveles)
+  'Herramientas tecnológicas: integración pedagógica y entornos digitales',
+  'Evaluación continua: roles tutor–estudiante y gestión del aula virtual',
+  // Ciclos XI–XII (Gema Roja · 300 niveles)
+  'Diseño instruccional avanzado: estrategias PACIE y objetos de aprendizaje',
+  'Gestión de proyectos educativos virtuales: planificación y seguimiento',
+  // Ciclos XIII–XIV (Gema Verde · 350 niveles)
+  'Innovación pedagógica: gamificación, microlearning y aprendizaje adaptativo',
+  'Proyectos FATLA–ASOMTV: casos de implementación real y análisis crítico',
+  // Ciclos XV–XVI (Púrpura · 400 niveles)
+  'Liderazgo educativo digital: gestión de comunidades virtuales de práctica',
+  'Investigación aplicada en entornos e-learning: metodología y métricas',
+  // Ciclos XVII–XVIII (Titanio · 450 niveles)
+  'Ecosistemas de aprendizaje: integración PACIE con IA y analítica educativa',
+  'Modelos de calidad en educación virtual: estándares internacionales PACIE',
+  // Ciclos XIX–XX (Zafiro · 500 niveles)
+  'Mentoría y transferencia del conocimiento PACIE: formación de formadores',
+  'Políticas institucionales de e-learning: normativa, accesibilidad y equidad',
+  // Ciclos XXI–XXII (Uranio · 550 niveles)
+  'Visión estratégica PACIE: transformación digital e impacto socioeducativo',
+  'Integración total PACIE: liderazgo, acreditación y legado en educación virtual',
+];
+
+const CYCLE_COLORS = [
+  'linear-gradient(90deg,#f59e0b,#d97706)',   // C·I    dorado
+  'linear-gradient(90deg,#3b82f6,#1d4ed8)',   // C·II   azul
+  'linear-gradient(90deg,#a855f7,#7e22ce)',   // C·III  púrpura
+  'linear-gradient(90deg,#0ea5e9,#0369a1)',   // C·IV   celeste
+  'linear-gradient(90deg,#10b981,#047857)',   // C·V    verde
+  'linear-gradient(90deg,#f43f5e,#be123c)',   // C·VI   rojo
+  'linear-gradient(90deg,#fb923c,#c2410c)',   // C·VII  naranja
+  'linear-gradient(90deg,#06b6d4,#0e7490)',   // C·VIII cian
+  'linear-gradient(90deg,#84cc16,#4d7c0f)',   // C·IX   lima
+  'linear-gradient(90deg,#e879f9,#a21caf)',   // C·X    fucsia
+  'linear-gradient(90deg,#38bdf8,#0284c7)',   // C·XI   azul claro
+  'linear-gradient(90deg,#fbbf24,#b45309)',   // C·XII  ámbar
+  'linear-gradient(90deg,#34d399,#065f46)',   // C·XIII menta
+  'linear-gradient(90deg,#818cf8,#4338ca)',   // C·XIV  índigo
+  'linear-gradient(90deg,#f87171,#991b1b)',   // C·XV   coral
+  'linear-gradient(90deg,#a3e635,#3f6212)',   // C·XVI  verde lima
+  'linear-gradient(90deg,#67e8f9,#0e7490)',   // C·XVII turquesa
+  'linear-gradient(90deg,#fda4af,#9f1239)',   // C·XVIII rosa
+  'linear-gradient(90deg,#c4b5fd,#5b21b6)',   // C·XIX  lavanda
+  'linear-gradient(90deg,#6ee7b7,#064e3b)',   // C·XX   esmeralda
+  'linear-gradient(90deg,#fcd34d,#92400e)',   // C·XXI  oro pálido
+  'linear-gradient(90deg,#7dd3fc,#1e3a8a)',   // C·XXII zafiro claro
+];
+// Etiquetas romanas para los 22 ciclos posibles
+const CYCLE_LBL = ['C·I','C·II','C·III','C·IV','C·V','C·VI','C·VII','C·VIII','C·IX','C·X','C·XI','C·XII','C·XIII','C·XIV','C·XV','C·XVI','C·XVII','C·XVIII','C·XIX','C·XX','C·XXI','C·XXII'];
+
+const NAME = 'Franklin Morillo González';
+let currentIndex = 0;
+
+/* ── Hash FNV-32 ── */
+function fnv32(s){ let h=2166136261; for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;} return h.toString(36).slice(0,5).toUpperCase(); }
+
+/* ── Sello SVG animado ── */
+function buildSeal(tier, size=72){
+  const id='s'+tier.min, [l0,l1,l2,l3]=tier.layers;
+  const hasPulse=tier.min>=250, hasRays=tier.min>=500, hasRings=tier.min>=550;
+  const dur=tier.min>=500?1.5:tier.min>=250?1.8:2.2;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"
+    style="filter:drop-shadow(0 0 14px ${tier.glow});display:block">
+    <defs>
+      <radialGradient id="bg${id}" cx="50%" cy="40%">
+        <stop offset="0%" stop-color="${l3}" stop-opacity=".4"/>
+        <stop offset="100%" stop-color="${l3}" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="f${id}"><feGaussianBlur stdDeviation="2.5" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    </defs>
+    ${hasRings?`<circle cx="50" cy="42" r="22" fill="none" stroke="${tier.core}" stroke-width=".8" opacity="0">
+      <animate attributeName="opacity" values="0;.4;0" dur="${dur}s" repeatCount="indefinite"/>
+      <animate attributeName="r" values="18;28;18" dur="${dur}s" repeatCount="indefinite"/></circle>`:''}
+    <circle cx="50" cy="50" r="46" fill="url(#bg${id})">
+      ${hasPulse?`<animate attributeName="r" values="43;50;43" dur="${dur}s" repeatCount="indefinite"/>`:''}</circle>
+    <path d="M50 88 L82 70 L50 52 L18 70 Z" fill="${l0}"/>
+    <path d="M50 79 L82 61 L50 43 L18 61 Z" fill="${l1}"/>
+    <path d="M50 70 L82 52 L50 34 L18 52 Z" fill="${l2}"/>
+    <path d="M50 61 L82 43 L50 25 L18 43 Z" fill="${l3}"/>
+    <path d="M50 52 L70 42 L50 32 L30 42 Z" fill="${tier.top}" filter="url(#f${id})">
+      <animate attributeName="opacity" values=".5;1;.5" dur="${dur}s" repeatCount="indefinite"/></path>
+    <circle cx="50" cy="42" r="5" fill="${tier.core}">
+      <animate attributeName="r" values="4;${hasPulse?7:6};4" dur="${dur}s" repeatCount="indefinite"/></circle>
+    ${hasRays?`
+    <line x1="50" y1="14" x2="50" y2="7" stroke="${tier.top}" stroke-width="2">
+      <animate attributeName="opacity" values="0;1;0" dur="${dur}s" begin="0s" repeatCount="indefinite"/></line>
+    <line x1="64" y1="18" x2="70" y2="12" stroke="${tier.top}" stroke-width="1.8">
+      <animate attributeName="opacity" values="0;1;0" dur="${dur}s" begin="${dur*.25}s" repeatCount="indefinite"/></line>
+    <line x1="36" y1="18" x2="30" y2="12" stroke="${tier.top}" stroke-width="1.8">
+      <animate attributeName="opacity" values="0;1;0" dur="${dur}s" begin="${dur*.5}s" repeatCount="indefinite"/></line>`:''}
+  </svg>`;
+}
+
+/* ── Renderizar diploma ── */
+function render(index){
+  currentIndex = index;
+  const tier = TIERS[index];
+  const td   = TIER_DATA[tier.min];
+  const year = new Date().getFullYear();
+  const date = new Date().toLocaleDateString('es-ES',{year:'numeric',month:'long',day:'numeric'});
+  const initials = NAME.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,4);
+  const certId = `FATLIN-${year}-${initials}${tier.min}T-${fnv32('SIM-'+tier.min+'-'+year)}`;
+  const verifyUrl = `https://fatlin.web.app/verify.html?id=${certId}`;
+
+  // Paper color
+  const paper = document.getElementById('cert-paper');
+  paper.style.background = tier.paperBg;
+  paper.style.borderColor = tier.paperBorder;
+
+  // Textos
+  document.getElementById('d-title').textContent   = td.certTitle;
+  document.getElementById('d-subtitle').textContent = `Acreditación Micro-curricular · ${tier.emoji} ${tier.label}`;
+  document.getElementById('d-chip').innerHTML        = td.chip;
+  document.getElementById('d-name').textContent      = NAME;
+  document.getElementById('d-role').textContent      = `${td.sideTier} · ${tier.min} Niveles Aprobados con IA`;
+  document.getElementById('d-achieve').innerHTML     =
+    `Ha completado <strong>${tier.min} niveles de evaluación continua con Inteligencia Artificial</strong>
+     sobre los contenidos oficiales de la Metodología PACIE, acreditando
+     <strong>${td.modules} módulos en ${td.cycles} ciclos progresivos</strong> con mínimo 5 respuestas
+     correctas por nivel, validado por FATLA, PACIE y ASOMTV.`;
+  document.getElementById('d-badge').textContent    = `${td.modules} Módulos · ${td.cycles} Ciclos ✅`;
+  document.getElementById('d-side-tier').textContent = td.sideTier;
+  document.getElementById('d-date').textContent      = date;
+  document.getElementById('d-sha').textContent       = `SHA · ${certId}`;
+  document.getElementById('d-certid').textContent    = certId;
+  document.getElementById('d-stat-lvl').textContent  = `${tier.min} ✅`;
+  document.getElementById('d-stat-mod').textContent  = `${td.modules} / ${td.modules}`;
+  document.getElementById('d-stat-q').textContent    = td.questions;
+
+  // Sello
+  document.getElementById('d-seal').innerHTML = buildSeal(tier, 72);
+
+  // Temas
+  // 2 temas por cada par de ciclos (1 tema visible por ciclo completado), máx 22
+  const topicsCount = Math.min(22, Math.max(2, td.cycles));
+  const grid = document.getElementById('d-topics');
+  grid.innerHTML = '';
+  TOPICS.slice(0, topicsCount).forEach((t, i) => {
+    const row = document.createElement('div');
+    row.className = 'c-topic-row';
+    row.innerHTML = `<div class="c-topic-chk">✓</div><span class="c-topic-num">${String(i+1).padStart(2,'0')}</span><span class="c-topic-name">${t}</span>`;
+    grid.appendChild(row);
+  });
+
+  // Ciclos
+  const cycleRows = document.getElementById('d-cycles');
+  cycleRows.innerHTML = '';
+  // Ajustar altura de barra y gap según número de ciclos
+  const cycleCount = td.cyclePcts.length;
+  const barH = cycleCount <= 6 ? 5 : cycleCount <= 10 ? 4 : cycleCount <= 16 ? 3 : 2;
+  const rowGap = cycleCount <= 8 ? 3 : cycleCount <= 14 ? 2 : 1;
+  const lblSize = cycleCount <= 8 ? '.54rem' : cycleCount <= 14 ? '.44rem' : '.36rem';
+  const pctSize = cycleCount <= 8 ? '.54rem' : cycleCount <= 14 ? '.44rem' : '.36rem';
+  document.getElementById('d-cycles').style.gap = rowGap + 'px';
+  td.cyclePcts.forEach((pct,i) => {
+    const row = document.createElement('div'); row.className = 'c-cycle-row';
+    row.innerHTML = `<span class="c-cycle-lbl" style="font-size:${lblSize};width:${cycleCount>14?'32px':'30px'}">${CYCLE_LBL[i]||'C·'+(i+1)}</span>
+      <div class="c-cycle-track" style="height:${barH}px"><div class="c-cycle-fill" style="background:${CYCLE_COLORS[i%22]};width:${pct}%"></div></div>
+      <span class="c-cycle-pct" style="font-size:${pctSize}">${pct}%</span>`;
+    cycleRows.appendChild(row);
+  });
+
+  // QR
+  const qrBox = document.getElementById('d-qr');
+  qrBox.innerHTML = '';
+  try {
+    new QRCode(qrBox, { text:verifyUrl, width:100, height:100, colorDark:'#002860', colorLight:'#ffffff', correctLevel:QRCode.CorrectLevel.M });
+  } catch(e) {
+    qrBox.innerHTML = `<div style="font-size:.45rem;color:#9ca3af;text-align:center;padding:6px">QR<br>verificable</div>`;
+  }
+
+  // Actualizar pills
+  document.querySelectorAll('.tier-pill').forEach((p,i) => p.classList.toggle('active', i===index));
+
+  // Animación de entrada
+  const frame = document.getElementById('diploma-frame');
+  frame.classList.remove('diploma-enter');
+  void frame.offsetWidth;
+  frame.classList.add('diploma-enter');
+
+  // Glow del marco según tier
+  document.getElementById('diploma-frame').style.boxShadow =
+    `0 0 0 1px rgba(80,160,255,.18),0 2px 4px rgba(0,0,0,.4),0 40px 120px rgba(0,0,0,.9),0 0 80px ${tier.glow.replace('.7','0.12').replace('.65','0.12').replace('.6','0.12')}`;
+}
+
+/* ── Construir selector ── */
+(function buildNav(){
+  const nav = document.getElementById('tier-nav');
+  TIERS.forEach((t,i) => {
+    const btn = document.createElement('button');
+    btn.className = 'tier-pill';
+    btn.style.setProperty('--tc', t.pillColor);
+    btn.innerHTML = `<span class="pip" style="background:${t.pillColor};box-shadow:0 0 6px ${t.pillColor}"></span>${t.emoji} ${t.label} <span style="opacity:.5">· Nv.${t.min}</span>`;
+    btn.onclick = () => render(i);
+    nav.appendChild(btn);
+  });
+})();
+
+/* ── Siguiente tier ── */
+function goNext(){ render((currentIndex+1) % TIERS.length); }
+
+/* ── Fondo estelar ── */
+(function buildStars(){
+  const cont = document.getElementById('stars-bg');
+  for(let i=0;i<90;i++){
+    const s = document.createElement('div'); s.className = 'star';
+    const sz = Math.random()*2+.5;
+    s.style.cssText = `width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;
+      --min:${(.05+Math.random()*.1).toFixed(2)};--max:${(.4+Math.random()*.55).toFixed(2)};
+      --d:${(2+Math.random()*5).toFixed(1)}s;--dl:${(Math.random()*5).toFixed(1)}s`;
+    cont.appendChild(s);
+  }
+})();
+
+/* ── Inicial: Bronce ── */
+render(0);
+</script>
+</body>
+</html>
